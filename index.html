@@ -65,7 +65,7 @@ input[type=text] { touch-action: manipulation; -webkit-user-select: text; user-s
   --stripe1: #FCB514; --stripe2: #FFFFFF; --stripe3: #0B3C8C;
 }
 
-#app {
+#app, .view {
   height: 100%; display: flex; flex-direction: column; gap: 12px;
   padding-block: calc(var(--safe-t) + 16px) calc(var(--safe-b) + 16px);
   padding-left: max(20px, env(safe-area-inset-left, 0px));
@@ -333,6 +333,107 @@ input[type=range]::-moz-range-thumb { width: 30px; height: 30px; border-radius: 
   .ng .mini-w { height: 38px; }
 }
 @container (max-height: 80px) { .tile .status { display: none; } }
+
+/* Logo doubles as the Home button */
+.logo-btn { position: relative; flex: none; display: block; line-height: 0; border-radius: 50%; }
+.logo-btn .home-badge { position: absolute; right: -4px; bottom: -4px; width: 22px; height: 22px; border-radius: 11px; background: #fff; color: var(--navy-900); display: flex; align-items: center; justify-content: center; line-height: 0; }
+a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+input[type=search] { touch-action: manipulation; -webkit-user-select: text; user-select: text; -webkit-appearance: none; appearance: none; }
+input[type=search]::-webkit-search-cancel-button { display: none; }
+a.btn { display: flex; }
+
+/* Home */
+.home { align-items: center; justify-content: center; gap: clamp(16px, 4vh, 40px); text-align: center; overflow-y: auto; }
+.home-brand { display: flex; flex-direction: column; align-items: center; gap: 10px; flex: none; }
+.home-brand img { width: min(150px, 20vh); height: auto; }
+.home-brand .title { font-size: clamp(30px, 6vh, 44px); }
+.h-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; width: min(940px, 100%); flex: none; }
+.h-tile { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 8px; text-align: left; padding: 24px; min-height: clamp(150px, 30vh, 270px); border-radius: 26px; color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 4px 0 rgba(0, 0, 0, 0.4); transition: transform 0.06s; }
+.h-tile:active { transform: scale(0.98); }
+.h-tile svg { margin-bottom: auto; }
+.h-sound { background: var(--accent); color: var(--accent-ink); }
+.h-games { background: linear-gradient(160deg, var(--royal), var(--blue)); }
+.h-name { font-family: var(--display); font-weight: 800; font-size: 40px; letter-spacing: 0.03em; line-height: 1; }
+.h-sub { font-size: 16px; font-weight: 600; opacity: 0.88; }
+
+/* Games */
+.games { gap: 10px; }
+.g-top { display: flex; align-items: center; gap: 12px; flex: none; min-height: 50px; }
+.g-h { margin: 0; font-family: var(--display); font-weight: 800; font-size: 36px; letter-spacing: 0.03em; line-height: 1; }
+.g-upd { margin-left: auto; font-size: 13px; color: var(--muted); text-align: right; }
+.g-btn { height: 46px; padding: 0 18px; border-radius: 23px; border: 2px solid rgba(255, 255, 255, 0.35); background: transparent; font-size: 17px; font-weight: 600; }
+.g-btn:disabled { opacity: 0.5; }
+.g-days { flex: none; min-height: 46px; }
+.g-tools { display: flex; align-items: center; gap: 12px; flex: none; min-width: 0; }
+.g-search { position: relative; flex: 0 0 min(380px, 40%); display: flex; align-items: center; }
+.g-search svg { position: absolute; left: 14px; opacity: 0.6; pointer-events: none; }
+.g-search input { width: 100%; height: 46px; border-radius: 23px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.08); color: #fff; font: inherit; font-size: 17px; padding: 0 40px 0 44px; }
+.g-search input::placeholder { color: rgba(255, 255, 255, 0.5); }
+.g-x { position: absolute; right: 6px; width: 34px; height: 34px; border: 0; border-radius: 17px; background: rgba(255, 255, 255, 0.14); font-size: 22px; line-height: 1; display: none; }
+.g-search input:not(:placeholder-shown) ~ .g-x { display: block; }
+.g-sports { flex: 1; min-width: 0; min-height: 46px; }
+.g-msg { flex: none; padding: 12px 18px; border-radius: 14px; font-size: 16px; font-weight: 600; background: rgba(255, 255, 255, 0.08); }
+.g-msg.warn { background: #5B2A1A; color: #FFD9C7; }
+.g-list { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 470px), 1fr)); gap: 10px; align-content: start; grid-auto-rows: max-content; padding-bottom: 14px; }
+.g-sec { grid-column: 1 / -1; margin: 8px 0 0; font-family: var(--display); font-weight: 800; font-size: 22px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-soft); }
+.g-card { display: grid; grid-template-columns: 104px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 16px; min-height: 92px; border-radius: 18px; background: var(--navy-800); border: 1px solid var(--line); }
+.g-card.fav { border-left: 7px solid var(--accent); background: var(--navy-700); }
+.g-card.now { box-shadow: inset 0 0 0 2px var(--accent-soft); }
+.g-card.past, .g-card.final, .g-card.off { opacity: 0.55; }
+.g-time b { display: block; font-family: var(--display); font-weight: 800; font-size: 30px; line-height: 1; white-space: nowrap; }
+.g-time b.sm { font-size: 19px; line-height: 1.15; white-space: normal; }
+.g-time span { display: block; margin-top: 4px; font-size: 13px; color: var(--muted); font-weight: 600; }
+.g-time span.live { color: var(--accent-ink); background: var(--accent); display: inline-block; padding: 2px 8px; border-radius: 8px; }
+.g-main { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.g-lg { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.g-teams { display: flex; flex-direction: column; gap: 2px; }
+.g-team { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 19px; line-height: 1.2; min-width: 0; }
+.g-team span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.g-team em { font-style: normal; font-size: 13px; color: var(--muted); }
+.g-team img, .g-nologo { width: 26px; height: 26px; flex: none; object-fit: contain; }
+.g-at { display: none; }
+.g-title { font-family: var(--display); font-weight: 800; font-size: 24px; line-height: 1.1; text-transform: uppercase; letter-spacing: 0.02em; }
+.g-sub { font-size: 14px; color: var(--muted); }
+.g-ch { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; max-width: 190px; }
+.ch { padding: 6px 12px; border-radius: 12px; background: #fff; color: var(--navy-900); font-weight: 700; font-size: 15px; white-space: nowrap; }
+.ch.more { background: rgba(255, 255, 255, 0.16); color: #fff; }
+.ch.none { background: transparent; color: var(--muted); border: 1px dashed var(--line); font-weight: 600; font-size: 14px; }
+
+@media (max-width: 700px) {
+  .home-brand img { width: 96px; }
+  .h-name { font-size: 32px; }
+  .h-tile { padding: 18px; min-height: 130px; }
+  .h-tile svg { width: 40px; height: 40px; }
+  .g-top { gap: 8px; min-height: 42px; }
+  .g-h { font-size: 28px; }
+  .g-btn { height: 40px; padding: 0 12px; border-radius: 20px; }
+  .g-rl, .g-upd { display: none; }
+  .g-h { margin-right: auto; }
+  .g-days, .g-sports { min-height: 40px; }
+  .g-tools { flex-wrap: wrap; gap: 8px; }
+  .g-search { flex: 1 1 100%; }
+  .g-search input { height: 42px; font-size: 16px; }
+  .g-sports { flex: 1 1 100%; }
+  .g-card { grid-template-columns: 86px minmax(0, 1fr); gap: 6px 12px; padding: 10px 12px; min-height: 0; }
+  .g-time b { font-size: 22px; }
+  .g-time b.sm { font-size: 15px; }
+  .g-team { font-size: 17px; }
+  .g-ch { grid-column: 1 / -1; justify-content: flex-start; max-width: none; }
+  .ch { padding: 4px 10px; font-size: 14px; }
+  .g-sec { font-size: 19px; }
+}
+@media (max-height: 500px) {
+  .home { flex-direction: row; flex-wrap: wrap; gap: 14px 24px; }
+  .home-brand img { width: 70px; }
+  .h-tile { min-height: 120px; padding: 14px 18px; }
+  .h-tile svg { width: 34px; height: 34px; }
+  .h-name { font-size: 28px; }
+  .g-top { min-height: 38px; }
+  .g-h { font-size: 26px; }
+  .g-btn, .g-search input { height: 38px; }
+  .g-days, .g-sports { min-height: 34px; }
+  .g-card { min-height: 0; padding: 8px 12px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .eq i { animation: none; }
   .tile { transition: none; }
@@ -341,10 +442,59 @@ input[type=range]::-moz-range-thumb { width: 30px; height: 30px; border-radius: 
 </style>
 </head>
 <body>
-<div id="app">
+<section id="home" class="view home" hidden>
+  <div class="home-brand">
+    <img src="logo.png" alt="Fulton Ale House logo" width="150" height="150">
+    <span class="eyebrow">FULTON ALE HOUSE</span>
+    <span class="title">
+      <svg width="30" height="22" viewBox="0 0 30 22" aria-hidden="true"><polygon points="8,0 14,0 6,22 0,22" style="fill: var(--stripe1)"/><polygon points="16,0 22,0 14,22 8,22" style="fill: var(--stripe2)"/><polygon points="24,0 30,0 22,22 16,22" style="fill: var(--stripe3)"/></svg>
+      <span>GAME DAY</span>
+    </span>
+  </div>
+  <nav class="h-tiles" aria-label="Sections">
+    <a class="h-tile h-sound" href="#/soundboard">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 010 7"/><path d="M19 6a8.5 8.5 0 010 12"/></svg>
+      <span class="h-name">SOUNDBOARD</span>
+      <span class="h-sub">Touchdown songs, crowd noise, and the rest</span>
+    </a>
+    <a class="h-tile h-games" href="#/games">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 9h5"/><path d="M7 12h3"/></svg>
+      <span class="h-name">GAMES</span>
+      <span id="homeGames" class="h-sub">What is on, when, and which channel</span>
+    </a>
+  </nav>
+</section>
+
+<section id="games" class="view games" hidden>
+  <header class="g-top">
+    <a class="btn g-btn" href="#/" aria-label="Home">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      <span>Home</span>
+    </a>
+    <h1 class="g-h">GAMES</h1>
+    <span id="gUpdated" class="g-upd" aria-live="polite"></span>
+    <button id="gRefresh" class="btn g-btn" type="button">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 11-2.4-5.7"/><path d="M20 4v5h-5"/></svg>
+      <span class="g-rl">Refresh</span>
+    </button>
+  </header>
+  <nav id="gDays" class="tabs g-days" aria-label="Day"></nav>
+  <div class="g-tools">
+    <label class="g-search">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <input id="gQ" type="search" placeholder="Search team, league or channel" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
+      <button id="gClear" class="g-x" type="button" aria-label="Clear search">&times;</button>
+    </label>
+    <nav id="gSports" class="tabs g-sports" aria-label="Sport"></nav>
+  </div>
+  <div id="gMsg" class="g-msg" hidden></div>
+  <main id="gList" class="g-list"></main>
+</section>
+
+<div id="app" hidden>
   <header class="top">
     <div class="brand">
-      <img id="logo" src="logo.png" data-bills="logo.png" data-sabres="logo-gold.png" alt="Fulton Ale House logo" width="56" height="56">
+      <a class="logo-btn" href="#/" aria-label="Back to home"><img id="logo" src="logo.png" data-bills="logo.png" data-sabres="logo-gold.png" alt="" width="56" height="56"><span class="home-badge" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-5v-6h-2v6H6v-9H3l9-8z"/></svg></span></a>
       <div class="brand-text">
         <span class="eyebrow">FULTON ALE HOUSE</span>
         <span class="title">
@@ -446,7 +596,7 @@ input[type=range]::-moz-range-thumb { width: 30px; height: 30px; border-radius: 
   </div>
 </div>
 
-<div id="start" class="start">
+<div id="start" class="start" hidden>
   <img src="logo.png" alt="" width="200" height="200">
   <button id="btnStart" class="start-btn" type="button">TAP TO START</button>
   <p>One tap turns the sound on.</p>
@@ -607,6 +757,257 @@ var Engine = (function () {
   };
 })();
 if (typeof module !== 'undefined') module.exports = Engine;
+
+/* Games page: what is on, when, and which channel. Data is ESPN's public scoreboard feed.
+   One fetch per league per day, saved on the device, so opening the page again the same day costs nothing. */
+(function () {
+  'use strict';
+  var TZ = 'America/New_York';
+  var KEY = 'fulton.games.v1';
+  var LEAGUES = [
+    { id: 'nfl', name: 'NFL', path: 'football/nfl', sport: 'football' },
+    { id: 'ncaaf', name: 'College Football', path: 'football/college-football', sport: 'football' },
+    { id: 'nba', name: 'NBA', path: 'basketball/nba', sport: 'basketball' },
+    { id: 'ncaam', name: 'College Basketball', path: 'basketball/mens-college-basketball', sport: 'basketball' },
+    { id: 'wnba', name: 'WNBA', path: 'basketball/wnba', sport: 'basketball' },
+    { id: 'mlb', name: 'MLB', path: 'baseball/mlb', sport: 'baseball' },
+    { id: 'nhl', name: 'NHL', path: 'hockey/nhl', sport: 'hockey' },
+    { id: 'epl', name: 'Premier League', path: 'soccer/eng.1', sport: 'soccer' },
+    { id: 'mls', name: 'MLS', path: 'soccer/usa.1', sport: 'soccer' },
+    { id: 'ucl', name: 'Champions League', path: 'soccer/uefa.champions', sport: 'soccer' },
+    { id: 'uel', name: 'Europa League', path: 'soccer/uefa.europa', sport: 'soccer' },
+    { id: 'laliga', name: 'La Liga', path: 'soccer/esp.1', sport: 'soccer' },
+    { id: 'bund', name: 'Bundesliga', path: 'soccer/ger.1', sport: 'soccer' },
+    { id: 'seriea', name: 'Serie A', path: 'soccer/ita.1', sport: 'soccer' },
+    { id: 'ligue1', name: 'Ligue 1', path: 'soccer/fra.1', sport: 'soccer' },
+    { id: 'wc', name: 'World Cup', path: 'soccer/fifa.world', sport: 'soccer' },
+    { id: 'pga', name: 'PGA Tour', path: 'golf/pga', sport: 'golf', solo: true },
+    { id: 'lpga', name: 'LPGA', path: 'golf/lpga', sport: 'golf', solo: true },
+    { id: 'atp', name: 'ATP Tennis', path: 'tennis/atp', sport: 'tennis', solo: true },
+    { id: 'wta', name: 'WTA Tennis', path: 'tennis/wta', sport: 'tennis', solo: true },
+    { id: 'ufc', name: 'UFC', path: 'mma/ufc', sport: 'mma', solo: true },
+    { id: 'f1', name: 'Formula 1', path: 'racing/f1', sport: 'racing', solo: true },
+    { id: 'nascar', name: 'NASCAR', path: 'racing/nascar-premier', sport: 'racing', solo: true },
+    { id: 'indy', name: 'IndyCar', path: 'racing/irl', sport: 'racing', solo: true }
+  ];
+  var SPORTS = [['football', 'Football'], ['basketball', 'Basketball'], ['baseball', 'Baseball'], ['hockey', 'Hockey'], ['soccer', 'Soccer'], ['golf', 'Golf'], ['tennis', 'Tennis'], ['mma', 'MMA'], ['racing', 'Racing']];
+  var DUR = { football: 3.8, basketball: 2.8, baseball: 3.4, hockey: 3, soccer: 2.3, mma: 5, racing: 3.5, golf: 6, tennis: 6 };
+  var G = { day: null, days: [], sport: 'all', q: '', rec: null, loading: false, stale: false, store: { days: {} }, seq: 0 };
+  var $ = function (s) { return document.querySelector(s); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  /* ---------- dates (the bar is on Eastern time) ---------- */
+  var dtf = new Intl.DateTimeFormat('en-US', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
+  function ymdOf(ms) {
+    var p = {}; dtf.formatToParts(new Date(ms)).forEach(function (x) { p[x.type] = x.value; });
+    return p.year + p.month + p.day;
+  }
+  function addDays(ymd, n) {
+    var d = new Date(Date.UTC(+ymd.slice(0, 4), +ymd.slice(4, 6) - 1, +ymd.slice(6, 8) + n, 12));
+    return d.getUTCFullYear() + ('0' + (d.getUTCMonth() + 1)).slice(-2) + ('0' + d.getUTCDate()).slice(-2);
+  }
+  function dayLabel(ymd, i) {
+    if (i === 0) return 'Today';
+    if (i === 1) return 'Tomorrow';
+    return new Date(Date.UTC(+ymd.slice(0, 4), +ymd.slice(4, 6) - 1, +ymd.slice(6, 8), 12)).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
+  }
+  function fmtTime(ms) { return new Date(ms).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: TZ }); }
+  function fmtShort(ms) { return new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: TZ }); }
+  function buildDays() {
+    var t = ymdOf(Date.now()); G.days = [];
+    for (var i = 0; i < 7; i++) G.days.push(addDays(t, i));
+    if (G.days.indexOf(G.day) < 0) G.day = G.days[0];
+  }
+
+  /* ---------- saved copy ---------- */
+  function loadStore() {
+    try { var s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && s.days) G.store = s; } catch (e) { /* none yet */ }
+    var today = ymdOf(Date.now());
+    Object.keys(G.store.days).forEach(function (k) { if (k < today) delete G.store.days[k]; });
+  }
+  function saveStore() { try { localStorage.setItem(KEY, JSON.stringify(G.store)); } catch (e) { /* storage full or blocked: fine */ } }
+  function fetchedToday(rec) { return !!rec && ymdOf(rec.t) === ymdOf(Date.now()); }
+
+  /* ---------- reading the feed ---------- */
+  function uniq(list, n) { n = (n || '').trim(); if (n && list.indexOf(n) < 0) list.push(n); }
+  function channelsOf(ev) {
+    var out = [], all = (ev.competitions || []).slice();
+    (ev.groupings || []).forEach(function (g) { (g.competitions || []).forEach(function (c) { all.push(c); }); });
+    all.push(ev);
+    // national channels first, then the rest
+    [true, false].forEach(function (nat) {
+      all.forEach(function (c) {
+        (c.broadcasts || []).forEach(function (b) { if ((b.market === 'national') === nat) (b.names || []).forEach(function (n) { uniq(out, n); }); });
+        if (!nat) (c.geoBroadcasts || []).forEach(function (g) { uniq(out, g.media && g.media.shortName); });
+      });
+    });
+    return out;
+  }
+  function teamOf(c) {
+    var t = c.team || {};
+    var rank = c.curatedRank && c.curatedRank.current > 0 && c.curatedRank.current <= 25 ? c.curatedRank.current : 0;
+    return { name: t.displayName || t.name || '', short: t.shortDisplayName || t.displayName || '', abbr: t.abbreviation || '', logo: t.logo || '', rank: rank };
+  }
+  function normalize(ev, lg) {
+    var comps = ev.competitions || [], c0 = comps[0] || {};
+    var st = (ev.status && ev.status.type) || (c0.status && c0.status.type) || {};
+    var start = Date.parse(ev.date || c0.date || ''); if (!isFinite(start)) return null;
+    var end = Date.parse(ev.endDate || c0.endDate || ''); if (!isFinite(end)) end = start;
+    var o = { id: lg.id + ':' + ev.id, lg: lg.id, sport: lg.sport, start: start, end: end, title: ev.name || ev.shortName || '', state: st.state || '', off: /POSTPON|CANCEL/i.test(st.name || ''), venue: (c0.venue && c0.venue.fullName) || '', ch: channelsOf(ev), home: null, away: null, multi: false, bouts: 0 };
+    var cs = c0.competitors || [];
+    if (!lg.solo && cs.length === 2 && cs[0].team && cs[1].team) {
+      var h = cs[0].homeAway === 'away' ? cs[1] : cs[0], a = h === cs[0] ? cs[1] : cs[0];
+      o.home = teamOf(h); o.away = teamOf(a);
+    }
+    if (lg.solo) { o.multi = (end - start) > 30 * 3600 * 1000; if (lg.sport === 'mma') o.bouts = comps.length; }
+    o.hay = [o.title, lg.name, lg.sport, o.venue, o.ch.join(' '), o.home ? o.home.name + ' ' + o.home.short + ' ' + o.home.abbr : '', o.away ? o.away.name + ' ' + o.away.short + ' ' + o.away.abbr : ''].join(' ').toLowerCase();
+    o.fav = !!(o.home && /buffalo/i.test(o.home.name + ' ' + o.away.name));
+    return o;
+  }
+  async function fetchLeague(lg, day) {
+    var ctl = window.AbortController ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, 12000);
+    try {
+      var res = await fetch('https://site.api.espn.com/apis/site/v2/sports/' + lg.path + '/scoreboard?dates=' + day + '&limit=100', ctl ? { signal: ctl.signal } : undefined);
+      if (res.status >= 500) throw new Error('server ' + res.status);
+      if (!res.ok) return [];                       // a league ESPN does not have: just empty
+      var j = await res.json(), out = [];
+      (j.events || []).forEach(function (ev) { var n = normalize(ev, lg); if (n) out.push(n); });
+      return out;
+    } finally { clearTimeout(to); }
+  }
+  async function load(day, force) {
+    var seq = ++G.seq, rec = G.store.days[day];
+    G.stale = false; G.failedAll = false;
+    if (!force && fetchedToday(rec) && !rec.failed.length) { G.rec = rec; G.loading = false; render(); return; }
+    var full = force || !fetchedToday(rec);
+    var todo = full ? LEAGUES : LEAGUES.filter(function (l) { return rec.failed.indexOf(l.id) >= 0; });
+    var next = full ? { t: Date.now(), ok: {}, failed: [] } : rec;
+    G.rec = rec || null; G.loading = true; render();
+    var results = await Promise.all(todo.map(function (lg) { return fetchLeague(lg, day).then(function (r) { return { id: lg.id, r: r }; }, function () { return { id: lg.id, r: null }; }); }));
+    if (seq !== G.seq) return;                      // the person moved on to another day
+    var failed = [];
+    results.forEach(function (x) { if (x.r) next.ok[x.id] = x.r; else failed.push(x.id); });
+    next.failed = failed;
+    if (failed.length === todo.length && todo.length === LEAGUES.length) {
+      // nothing came back: keep any older saved copy for this day
+      G.stale = !!rec; G.rec = rec || null; G.loading = false; G.failedAll = true; render(); return;
+    }
+    G.failedAll = false;
+    G.store.days[day] = next; saveStore();
+    G.rec = next; G.loading = false; render();
+  }
+
+  /* ---------- drawing ---------- */
+  function events() {
+    var out = [];
+    if (!G.rec) return out;
+    Object.keys(G.rec.ok).forEach(function (k) { out = out.concat(G.rec.ok[k]); });
+    return out;
+  }
+  function matches(e) {
+    if (!G.q) return true;
+    return G.q.toLowerCase().split(/\s+/).filter(Boolean).every(function (w) { return e.hay.indexOf(w) >= 0; });
+  }
+  function phase(e, now) {
+    if (e.off) return 'off';
+    if (e.multi) return now > e.end ? 'past' : (now >= e.start ? 'now' : 'soon');
+    if (e.state === 'post') return 'final';
+    var d = (DUR[e.sport] || 3) * 3600 * 1000;
+    if (now > e.start + d) return 'past';
+    return now >= e.start ? 'now' : 'soon';
+  }
+  function chHtml(e) {
+    if (!e.ch.length) return '<span class="ch none">Channel TBA</span>';
+    var show = e.ch.slice(0, 4), more = e.ch.length - show.length;
+    return show.map(function (c) { return '<span class="ch">' + esc(c) + '</span>'; }).join('') + (more > 0 ? '<span class="ch more">+' + more + '</span>' : '');
+  }
+  function teamHtml(t) {
+    return '<div class="g-team">' + (t.logo ? '<img src="' + esc(t.logo) + '" alt="" loading="lazy" width="24" height="24" onerror="this.style.display=\'none\'">' : '<i class="g-nologo"></i>') +
+      '<span>' + (t.rank ? '<em>' + t.rank + '</em> ' : '') + esc(t.name) + '</span></div>';
+  }
+  function cardHtml(e, now, lgName) {
+    var ph = phase(e, now), time, sub = '';
+    if (e.multi) { time = '<b class="sm">' + esc(fmtShort(e.start)) + ' &ndash; ' + esc(fmtShort(e.end - 3600000)) + '</b>'; sub = ph === 'now' ? 'In progress' : ''; }
+    else { time = '<b>' + esc(fmtTime(e.start)) + '</b>'; sub = ph === 'now' ? 'On now' : ph === 'final' ? 'Final' : ph === 'past' ? 'Over' : ph === 'off' ? 'Postponed' : 'ET'; }
+    var main = e.home
+      ? '<div class="g-teams">' + teamHtml(e.away) + '<div class="g-at">at</div>' + teamHtml(e.home) + '</div>'
+      : '<div class="g-title">' + esc(e.title) + '</div>' + (e.bouts ? '<div class="g-sub">' + e.bouts + ' fights</div>' : '');
+    return '<article class="g-card ' + (e.fav ? 'fav ' : '') + ph + '">' +
+      '<div class="g-time">' + time + '<span class="' + (ph === 'now' ? 'live' : '') + '">' + sub + '</span></div>' +
+      '<div class="g-main"><div class="g-lg">' + esc(lgName) + (e.venue && e.home ? ' &middot; ' + esc(e.venue) : '') + '</div>' + main + '</div>' +
+      '<div class="g-ch">' + chHtml(e) + '</div></article>';
+  }
+  function render() {
+    if ($('#games').hidden) return;
+    var now = Date.now(), lgName = {}; LEAGUES.forEach(function (l) { lgName[l.id] = l.name; });
+    // day tabs
+    $('#gDays').innerHTML = G.days.map(function (d, i) {
+      return '<button type="button" class="tab" data-day="' + d + '" aria-pressed="' + (d === G.day) + '">' + esc(dayLabel(d, i)) + '</button>';
+    }).join('');
+    // sport chips, with counts for what is on this day
+    var all = events().filter(matches), cnt = {};
+    all.forEach(function (e) { cnt[e.sport] = (cnt[e.sport] || 0) + 1; });
+    $('#gSports').innerHTML = '<button type="button" class="tab" data-sport="all" aria-pressed="' + (G.sport === 'all') + '">All <span class="n">' + all.length + '</span></button>' +
+      SPORTS.filter(function (s) { return cnt[s[0]] || G.sport === s[0]; }).map(function (s) {
+        return '<button type="button" class="tab" data-sport="' + s[0] + '" aria-pressed="' + (G.sport === s[0]) + '">' + s[1] + ' <span class="n">' + (cnt[s[0]] || 0) + '</span></button>';
+      }).join('');
+    var list = all.filter(function (e) { return G.sport === 'all' || e.sport === G.sport; });
+    var day = list.filter(function (e) { return !e.multi; }).sort(function (a, b) { return a.start - b.start || a.title.localeCompare(b.title); });
+    var long = list.filter(function (e) { return e.multi; }).sort(function (a, b) { return a.start - b.start; });
+    var fav = day.filter(function (e) { return e.fav; });
+    var html = '';
+    if (fav.length) html += '<h2 class="g-sec">Buffalo</h2>' + fav.map(function (e) { return cardHtml(e, now, lgName[e.lg]); }).join('');
+    var rest = fav.length ? day.filter(function (e) { return !e.fav; }) : day;
+    if (rest.length) html += (fav.length ? '<h2 class="g-sec">Everything else</h2>' : '') + rest.map(function (e) { return cardHtml(e, now, lgName[e.lg]); }).join('');
+    if (long.length) html += '<h2 class="g-sec">Tournaments and series</h2>' + long.map(function (e) { return cardHtml(e, now, lgName[e.lg]); }).join('');
+    $('#gList').innerHTML = html;
+    // messages
+    var msg = '', kind = '';
+    var failedNames = G.rec ? G.rec.failed.map(function (id) { return lgName[id]; }).filter(Boolean) : [];
+    if (G.loading && !G.rec) { msg = 'Loading today&rsquo;s schedule&hellip;'; kind = 'info'; }
+    else if (G.failedAll) { msg = (G.stale ? 'Can&rsquo;t reach the schedule right now. Showing the last saved copy. ' : 'Can&rsquo;t reach the schedule right now. Check the Wi-Fi and tap Refresh.'); kind = 'warn'; }
+    else if (!html && !G.loading) { msg = G.q || G.sport !== 'all' ? 'Nothing matches. Try another sport or clear the search.' : 'No games found for this day.'; kind = 'info'; }
+    else if (failedNames.length && !G.loading) { msg = 'Couldn&rsquo;t load: ' + failedNames.map(esc).join(', ') + '. Tap Refresh to try again.'; kind = 'warn'; }
+    var m = $('#gMsg'); m.hidden = !msg; m.innerHTML = msg; m.className = 'g-msg ' + kind;
+    $('#gUpdated').textContent = G.loading ? 'Updating…' : (G.rec ? 'Updated ' + fmtTime(G.rec.t) : '');
+    $('#gRefresh').disabled = G.loading;
+  }
+
+  /* ---------- wiring ---------- */
+  $('#gDays').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    G.day = b.dataset.day; load(G.day, false);
+  });
+  $('#gSports').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    G.sport = b.dataset.sport; render();
+  });
+  $('#gQ').addEventListener('input', function (e) { G.q = e.target.value.trim(); render(); });
+  $('#gQ').addEventListener('keydown', function (e) { if (e.key === 'Enter') e.target.blur(); });
+  $('#gClear').addEventListener('click', function () { $('#gQ').value = ''; G.q = ''; render(); $('#gQ').focus(); });
+  $('#gRefresh').addEventListener('click', function () { load(G.day, true); });
+  setInterval(function () { if (!$('#games').hidden && document.visibilityState === 'visible') render(); }, 60000);
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && !$('#games').hidden) Games.show();
+  });
+
+  var Games = {
+    show: function () {
+      loadStore(); var before = G.day; buildDays();
+      if (before && before !== G.day) G.rec = null;
+      render(); load(G.day, false);
+    },
+    todayCount: function () {
+      loadStore();
+      var rec = G.store.days[ymdOf(Date.now())];
+      if (!fetchedToday(rec)) return null;
+      var n = 0; Object.keys(rec.ok).forEach(function (k) { rec.ok[k].forEach(function (e) { if (!e.multi) n++; }); });
+      return n;
+    },
+    _test: { normalize: normalize, LEAGUES: LEAGUES }
+  };
+  window.Games = Games;
+})();
 
 (function () {
   'use strict';
@@ -1330,7 +1731,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
     fixTags(); renderAll();
     var l = visible(); S.selected = l.length ? l[0].id : null;
   }
-  window.__sb = { S: S, voices: voices, E: E, press: press };
+  window.__sb = { S: S, voices: voices, E: E, press: press, stopAll: stopAll, applyTeam: applyTeam };
   boot();
   try {
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
@@ -1339,6 +1740,32 @@ if (typeof module !== 'undefined') module.exports = Engine;
       navigator.serviceWorker.register('sw.js').catch(function () {});
     }
   } catch (e) { /* optional */ }
+})();
+
+/* Three screens: home, soundboard, games. The address hash picks the screen, so the back button works. */
+(function () {
+  'use strict';
+  var $ = function (s) { return document.querySelector(s); };
+  var VIEWS = { home: '#home', soundboard: '#app', games: '#games' };
+  var TITLES = { home: 'Fulton Ale House', soundboard: 'Soundboard', games: 'Games' };
+  var cur = null;
+  function route() {
+    var h = (location.hash || '').replace(/^#\/?/, ''), v = VIEWS[h] ? h : 'home', sb = window.__sb;
+    if (cur === 'soundboard' && v !== 'soundboard' && sb) sb.stopAll();
+    Object.keys(VIEWS).forEach(function (k) { $(VIEWS[k]).hidden = k !== v; });
+    document.title = TITLES[v];
+    // home and games always wear the Bills look; the soundboard wears whichever team is selected
+    if (v === 'soundboard') { if (sb) sb.applyTeam(); $('#start').hidden = !!(sb && sb.S.started); }
+    else { document.documentElement.removeAttribute('data-team'); $('#start').hidden = true; }
+    if (v === 'games') window.Games.show();
+    if (v === 'home') {
+      var n = window.Games.todayCount();
+      $('#homeGames').textContent = n === null ? 'What is on, when, and which channel' : (n + (n === 1 ? ' game' : ' games') + ' on today');
+    }
+    cur = v;
+  }
+  window.addEventListener('hashchange', route);
+  route();
 })();
 
 </script>
