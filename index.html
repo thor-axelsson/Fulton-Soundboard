@@ -251,6 +251,64 @@ input[type=range]::-moz-range-thumb { width: 30px; height: 30px; border-radius: 
   .btn-stop { width: 150px; }
   .top .team { width: 190px; }
 }
+
+/* Phones: portrait (narrow) */
+@media (max-width: 700px) {
+  .panel { padding: 10px; gap: 8px; }
+  .p-up .drop-s { display: none; }
+  #app { gap: 8px; padding-block: calc(var(--safe-t) + 10px) calc(var(--safe-b) + 10px); padding-left: max(10px, env(safe-area-inset-left, 0px)); padding-right: max(10px, env(safe-area-inset-right, 0px)); }
+  .top { gap: 6px; min-height: 40px; }
+  .brand { flex: none; }
+  .brand img { width: 34px; height: 34px; }
+  .top .team { flex: 1; width: auto; min-width: 120px; height: 40px; }
+  .team button { font-size: 16px; letter-spacing: 0.03em; padding: 0 2px; }
+  .btn { height: 40px; border-radius: 20px; }
+  .btn-edit { width: 40px; padding: 0; }
+  #btnEditLabel { display: none; }
+  .btn-stop { width: auto; padding: 0 10px; font-size: 16px; gap: 5px; }
+  .btn-stop svg { width: 16px; height: 16px; }
+  .tabrow { min-height: 40px; }
+  .tabs { min-height: 40px; gap: 8px; }
+  .tabs .count { display: none; }
+  .tab { height: 38px; padding: 0 14px; font-size: 15px; }
+  .pill { font-size: 13px; padding: 0 12px; max-width: 45%; }
+  .grid { gap: 6px; }
+  .tile { padding: 8px 10px; border-radius: 12px; }
+  .tile .chip { display: none; }
+  .tile .status { font-size: 12px; }
+  .tile .name { font-size: clamp(12px, min(9.5cqi, 24cqh), 26px); }
+  .empty h2 { font-size: 30px; }
+  .empty p { font-size: 15px; }
+  .big { height: 48px; font-size: 16px; padding: 0 20px; }
+  .start-btn { height: 60px; padding: 0 36px; font-size: 28px; }
+  .start img { width: 140px; height: 140px; }
+  .ed-top h2 { font-size: 24px; }
+  .ed-row { flex-wrap: wrap; }
+  .glabel .gn { font-size: 16px; }
+  .toast { font-size: 14px; }
+}
+/* Phones: landscape (short) */
+@media (max-height: 500px) {
+  #app { gap: 6px; padding-block: calc(var(--safe-t) + 6px) calc(var(--safe-b) + 6px); }
+  .top { min-height: 40px; gap: 10px; }
+  .brand img { width: 36px; height: 36px; }
+  .brand-text { display: none; }
+  .btn { height: 38px; border-radius: 19px; }
+  .btn-stop { width: 140px; font-size: 21px; }
+  .btn-edit { padding: 0 14px; font-size: 15px; }
+  .top .team { height: 38px; width: 200px; }
+  .team button { font-size: 17px; }
+  .tabrow { min-height: 34px; }
+  .tabs { min-height: 34px; }
+  .tab { height: 32px; padding: 0 14px; font-size: 14px; }
+  .tabs .count { display: none; }
+  .grid { gap: 6px; }
+  .tile { padding: 6px 10px; border-radius: 12px; }
+  .tile .chip { display: none; }
+  .tile .status { font-size: 11px; }
+  .panel { max-height: 60vh; }
+}
+@container (max-height: 80px) { .tile .status { display: none; } }
 @media (prefers-reduced-motion: reduce) {
   .eq i { animation: none; }
   .tile { transition: none; }
@@ -520,140 +578,6 @@ var Engine = (function () {
   };
 })();
 if (typeof module !== 'undefined') module.exports = Engine;
-
-/* Generated stand-in clips so the app can be tried before real clips are loaded.
-   Deliberately uneven: different loudness, leading silence and tails, to exercise leveling and auto-trim. */
-var Demo = (function () {
-  var FS = 44100, seed = 1234567;
-  function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296 * 2 - 1; }
-  function mk(sec, fn) {
-    var n = Math.round(sec * FS), a = new Float32Array(n);
-    for (var i = 0; i < n; i++) a[i] = fn(i / FS, i);
-    return a;
-  }
-  function pad(a, lead, tail) {
-    var l = Math.round(lead * FS), t = Math.round(tail * FS), o = new Float32Array(l + a.length + t);
-    o.set(a, l); return o;
-  }
-  function norm(a, peakDb) {
-    var m = 0, i;
-    for (i = 0; i < a.length; i++) { var v = Math.abs(a[i]); if (v > m) m = v; }
-    var g = m > 0 ? Math.pow(10, peakDb / 20) / m : 1;
-    for (i = 0; i < a.length; i++) a[i] *= g;
-    return a;
-  }
-  function mix() {
-    var len = 0, i, j, args = arguments;
-    for (i = 0; i < args.length; i++) len = Math.max(len, args[i].length);
-    var o = new Float32Array(len);
-    for (i = 0; i < args.length; i++) for (j = 0; j < args[i].length; j++) o[j] += args[i][j];
-    return o;
-  }
-  function at(a, sec, len) { return pad(a, sec, 0); }
-  function sine(f, t) { return Math.sin(2 * Math.PI * f * t); }
-  function saw(f, t) { return 2 * ((f * t) % 1) - 1; }
-  function sq(f, t) { return ((f * t) % 1) < 0.5 ? 1 : -1; }
-  function env(t, d, a, r) { if (t < a) return t / a; if (t > d - r) return Math.max(0, (d - t) / r); return 1; }
-  function note(f, d, kind) {
-    return mk(d, function (t) {
-      var w = kind === 'sq' ? sq(f, t) : kind === 'sine' ? sine(f, t) : (saw(f, t) * 0.6 + sq(f * 2, t) * 0.25);
-      return w * env(t, d, 0.01, Math.min(0.12, d / 2));
-    });
-  }
-  function seq(notes, gap, kind) {
-    var parts = [], t = 0;
-    notes.forEach(function (n) { parts.push(at(note(n[0], n[1], kind), t)); t += n[2] === undefined ? gap : n[2]; });
-    return mix.apply(null, parts);
-  }
-  function lp(a, k) { var y = 0, o = new Float32Array(a.length); for (var i = 0; i < a.length; i++) { y += k * (a[i] - y); o[i] = y; } return o; }
-  function noise(sec, fn) { return mk(sec, function (t) { return rnd() * (fn ? fn(t) : 1); }); }
-  function sweep(f0, f1, sec, kind) {
-    var ph = 0;
-    return mk(sec, function (t) {
-      var f = f0 + (f1 - f0) * (t / sec); ph += f / FS;
-      var w = kind === 'saw' ? 2 * (ph % 1) - 1 : Math.sin(2 * Math.PI * ph);
-      return w * env(t, sec, 0.03, 0.15);
-    });
-  }
-  function thump(f0, sec) { var ph = 0; return mk(sec, function (t) { ph += (f0 * Math.exp(-t * 7) + 35) / FS; return Math.sin(2 * Math.PI * ph) * Math.exp(-t * 9); }); }
-  function clap() { return mk(0.18, function (t) { return rnd() * Math.exp(-t * 38); }); }
-
-  var C5 = 523.25, E5 = 659.25, G5 = 783.99, C6 = 1046.5, E6 = 1318.5, G4 = 392, C4 = 261.63, E4 = 329.63;
-
-  function specs() {
-    return [
-      ['Touchdown Anthem', 'Scoring', function () {
-        var arp = seq([[C5, .3], [E5, .3], [G5, .3], [C6, .3], [G5, .3], [C6, .3], [E6, .3], [C6, .3]], .3, 'saw');
-        var chord = at(mix(note(C5, 1.8, 'saw'), note(E5, 1.8, 'saw'), note(G5, 1.8, 'saw'), note(C6, 1.8, 'sq')), 2.4);
-        return pad(norm(mix(arp, chord), -22), 0.45, 0.4);
-      }],
-      ['Touchdown Short', 'Scoring', function () { return pad(norm(seq([[G4, .18], [C5, .18], [E5, .7]], .18, 'saw'), -14), 0.1, 0.2); }],
-      ['Field Goal', 'Scoring', function () { return pad(norm(seq([[C5, .25], [G5, .8]], .25, 'sq'), -18), 0.6, 0.3); }],
-      ['Safety', 'Scoring', function () { return pad(norm(seq([[G4, .3], [C4, .8]], .3, 'saw'), -12), 0.05, 0.5); }],
-      ['Two-Point Good', 'Scoring', function () { return pad(norm(seq([[E5, .12], [E5, .12], [E5, .5]], .2, 'sq'), -16), 0.2, 0.2); }],
-      ['Josh Allen Heroics', 'Heroes', function () {
-        var a = mix(note(C5, 3.6, 'saw'), note(E5, 3.6, 'saw'), note(G5, 3.6, 'saw'), note(C6, 3.6, 'saw'));
-        for (var i = 0; i < a.length; i++) { var t = i / FS; a[i] *= Math.min(1, t / 1.4) * (1 + 0.15 * sine(5.5, t)); }
-        return pad(norm(a, -24), 0.35, 0.8);
-      }],
-      ['Let Him Cook', 'Heroes', function () {
-        var s = noise(1.6, function (t) { return (rnd() > 0.55 ? 1 : 0.15) * env(t, 1.6, 0.05, 0.4); });
-        return pad(norm(mix(lp(s, 0.6), at(sweep(300, 900, 1.2, 'saw'), 0.3)), -17), 0.25, 0.3);
-      }],
-      ['Hail Mary', 'Heroes', function () { return pad(norm(sweep(300, 1500, 2.5, 'saw'), -20), 0.7, 0.4); }],
-      ['Big Sack', 'Defense', function () {
-        return pad(norm(mix(thump(120, 0.7), lp(noise(0.25, function (t) { return Math.exp(-t * 14); }), 0.5)), -6), 0.05, 0.15);
-      }],
-      ['Interception', 'Defense', function () { return pad(norm(mix(sweep(1200, 300, 0.9, 'sine'), at(note(G5, .25, 'sq'), 1.0)), -22), 0.5, 0.3); }],
-      ['Fumble Recovery', 'Defense', function () { return pad(norm(mix(thump(110, 0.5), at(thump(90, 0.6), 0.28)), -16), 0.15, 0.2); }],
-      ['Fourth-Down Stop', 'Defense', function () { return pad(norm(mk(0.9, function (t) { return sq(120, t) * env(t, 0.9, 0.01, 0.1); }), -10), 0.1, 0.1); }],
-      ['Air Horn', 'Crowd', function () {
-        return pad(norm(mk(1.4, function (t) { return (sq(400, t) + sq(405, t) + sq(600, t) * 0.8 + sq(800, t) * 0.5) * env(t, 1.4, 0.02, 0.1); }), -2), 0.05, 0.1);
-      }],
-      ['Crowd Roar', 'Crowd', function () {
-        var n = lp(noise(4, function (t) { return Math.sin(Math.PI * Math.min(1, t / 4)) ; }), 0.18);
-        return pad(norm(n, -28), 0.5, 1.0);
-      }],
-      ["Let's Go Buffalo", 'Crowd', function () {
-        var p = []; for (var i = 0; i < 4; i++) p.push(at(clap(), i * 0.45));
-        return pad(norm(mix.apply(null, p), -15), 0.2, 0.3);
-      }],
-      ['Table Smash', 'Crowd', function () { return pad(norm(mix(thump(160, 0.4), noise(0.3, function (t) { return Math.exp(-t * 20); })), -5), 0.02, 0.1); }],
-      ['Other Team Scores', 'Their Side', function () { return pad(norm(mk(1.8, function (t) { return saw(300 - 120 * (t / 1.8) + 6 * sine(6, t), t) * env(t, 1.8, 0.04, 0.3); }), -19), 0.4, 0.4); }],
-      ['Boo', 'Their Side', function () { return pad(norm(lp(mk(2.4, function (t) { return saw(110 + 8 * sine(4, t), t) * env(t, 2.4, 0.5, 0.6); }), 0.06), -23), 0.3, 0.5); }],
-      ['Flag Thrown', 'Their Side', function () { return pad(norm(mk(1.0, function (t) { return sine(2800 + 120 * sine(18, t), t) * env(t, 1.0, 0.02, 0.1); }), -13), 0.1, 0.1); }],
-      ['Bad Call', 'Their Side', function () { return pad(norm(seq([[180, .35], [150, .6]], .35, 'sq'), -9), 0.35, 0.2); }]
-    ];
-  }
-
-  function specsSabres() {
-    return [
-      ['Goal Horn', 'Goals', function () { return pad(norm(mk(1.6, function (t) { return (sq(220, t) + sq(222, t) + sq(330, t) * 0.8 + sq(440, t) * 0.6) * env(t, 1.6, 0.02, 0.15); }), -3), 0.05, 0.1); }],
-      ['Goal Anthem', 'Goals', function () { return pad(norm(seq([[C5, .22], [E5, .22], [G5, .22], [C6, .22], [G5, .22], [C6, .9]], .22, 'saw'), -20), 0.4, 0.4); }],
-      ['Power Play Goal', 'Goals', function () { return pad(norm(mix(seq([[G4, .2], [C5, .2], [E5, .2], [G5, .8]], .2, 'sq'), thump(100, 0.4)), -16), 0.15, 0.2); }],
-      ['Big Save', 'Saves', function () { return pad(norm(mix(thump(130, 0.5), at(note(G5 * 2, .3, 'sine'), 0.1)), -12), 0.1, 0.2); }],
-      ['Post Ping', 'Saves', function () { return pad(norm(mk(1.2, function (t) { return sine(1760, t) * Math.exp(-t * 4); }), -18), 0.4, 0.2); }],
-      ['Shutout', 'Saves', function () {
-        var a = mix(note(C5, 2.6, 'saw'), note(G5, 2.6, 'saw'), note(C6, 2.6, 'saw'));
-        for (var i = 0; i < a.length; i++) a[i] *= Math.min(1, i / FS / 1.0);
-        return pad(norm(a, -23), 0.3, 0.6);
-      }],
-      ['Big Hit', 'Penalties', function () { return pad(norm(mix(thump(150, 0.5), lp(noise(0.2, function (t) { return Math.exp(-t * 16); }), 0.4)), -7), 0.03, 0.15); }],
-      ['Penalty Whistle', 'Penalties', function () { return pad(norm(mk(1.1, function (t) { return sine(3000 + 150 * sine(22, t), t) * env(t, 1.1, 0.02, 0.1); }), -13), 0.12, 0.1); }],
-      ['Power Play', 'Penalties', function () { return pad(norm(sweep(500, 1400, 1.6, 'saw'), -19), 0.5, 0.3); }],
-      ['Crowd Roar', 'Crowd', function () { return pad(norm(lp(noise(4, function (t) { return Math.sin(Math.PI * Math.min(1, t / 4)); }), 0.18), -28), 0.5, 1.0); }],
-      ["Let's Go Buffalo", 'Crowd', function () { var p = []; for (var i = 0; i < 4; i++) p.push(at(clap(), i * 0.45)); return pad(norm(mix.apply(null, p), -15), 0.2, 0.3); }],
-      ['Their Goal', 'Their Side', function () { return pad(norm(mk(1.8, function (t) { return saw(300 - 120 * (t / 1.8) + 6 * sine(6, t), t) * env(t, 1.8, 0.04, 0.3); }), -19), 0.4, 0.4); }],
-      ['Boo', 'Their Side', function () { return pad(norm(lp(mk(2.4, function (t) { return saw(110 + 8 * sine(4, t), t) * env(t, 2.4, 0.5, 0.6); }), 0.06), -23), 0.3, 0.5); }]
-    ];
-  }
-  function list(team) { return team === 'sabres' ? specsSabres() : specs(); }
-  function build(i, team) {
-    var s = list(team)[i];
-    return { name: s[0], tag: s[1], wav: Engine.encodeWav(s[2](), FS) };
-  }
-  return { count: function (team) { return list(team).length; }, build: build };
-})();
 
 (function () {
   'use strict';
@@ -1043,8 +967,9 @@ var Demo = (function () {
     document.body.classList.toggle('compact', S.edit || grouped);
     if (!teamClips().length) {
       grid.style.gridTemplateColumns = '1fr'; grid.style.gridTemplateRows = '1fr';
-      grid.innerHTML = '<div class="empty"><h2>No ' + TEAMS[S.team] + ' clips yet</h2><p>Add the sound clips you play for ' + TEAMS[S.team] + ' games, or load generated demo clips to try the layout and the leveling.</p>' +
-        '<div class="row"><button class="big" type="button" data-act="add">Add clips</button><button class="big ghost" type="button" data-act="demo">Load demo clips</button></div></div>';
+      var hasDemo = typeof Demo !== 'undefined';
+      grid.innerHTML = '<div class="empty"><h2>No ' + TEAMS[S.team] + ' clips yet</h2><p>Add the sound clips you play for ' + TEAMS[S.team] + ' games. Tap Add clips and pick them from your device.</p>' +
+        '<div class="row"><button class="big" type="button" data-act="add">Add clips</button>' + (hasDemo ? '<button class="big ghost" type="button" data-act="demo">Load demo clips</button>' : '') + '</div></div>';
       return;
     }
     var html = '', cols, rows;
@@ -1231,7 +1156,7 @@ var Demo = (function () {
   });
   grid.addEventListener('click', function (e) {
     var a = e.target.closest('[data-act]');
-    if (a) { if (a.dataset.act === 'add') $('#fileIn').click(); else loadDemo(); return; }
+    if (a) { if (a.dataset.act === 'add') $('#fileIn').click(); else if (typeof Demo !== 'undefined') loadDemo(); return; }
     var t = e.target.closest('.tile');
     if (t && e.detail === 0) press(t.dataset.id);
   });
