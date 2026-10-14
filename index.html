@@ -223,9 +223,15 @@ input[type=range]::-moz-range-thumb { width: 30px; height: 30px; border-radius: 
 .chips:empty { display: none; }
 .chips button { height: 40px; padding: 0 16px; border-radius: 20px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.08); font-size: 15px; font-weight: 600; }
 .chips button[aria-pressed=true] { background: #fff; color: var(--navy-900); }
+.sheet > * { flex: none; }
 .wave-wrap { border-radius: 14px; background: var(--navy-900); overflow: hidden; }
 #wave { display: block; width: 100%; height: 180px; }
 .times { display: flex; gap: 22px; flex-wrap: wrap; font-size: 15px; color: rgba(255, 255, 255, 0.8); font-variant-numeric: tabular-nums; }
+.hint { margin: 0; font-size: 14px; color: var(--muted); }
+.nudge { display: flex; gap: 18px; flex-wrap: wrap; }
+.ng { display: flex; align-items: center; gap: 8px; }
+.ng span { width: 46px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.ng .mini-w { width: 56px; padding: 0; font-size: 22px; }
 .times b { color: #fff; font-weight: 600; }
 .ed-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
@@ -282,7 +288,12 @@ input[type=range]::-moz-range-thumb { width: 30px; height: 30px; border-radius: 
   .big { height: 48px; font-size: 16px; padding: 0 20px; }
   .start-btn { height: 60px; padding: 0 36px; font-size: 28px; }
   .start img { width: 140px; height: 140px; }
+  .modal { padding: 0; align-items: stretch; }
+  .sheet { border-radius: 0; max-height: none; height: 100%; padding: calc(var(--safe-t) + 12px) 14px calc(var(--safe-b) + 14px); gap: 10px; }
+  .ed-top { order: -3; position: sticky; top: 0; z-index: 2; background: var(--navy-800); } .hint { order: -2; } .wave-wrap { order: -1; }
+  #wave { height: 170px; }
   .ed-top h2 { font-size: 24px; }
+  .times { gap: 4px 14px; font-size: 14px; }
   .ed-row { flex-wrap: wrap; }
   .glabel .gn { font-size: 16px; }
   .toast { font-size: 14px; }
@@ -307,6 +318,19 @@ input[type=range]::-moz-range-thumb { width: 30px; height: 30px; border-radius: 
   .tile .chip { display: none; }
   .tile .status { font-size: 11px; }
   .panel { max-height: 60vh; }
+  .modal { padding: 0; align-items: stretch; }
+  .sheet { border-radius: 0; max-height: none; height: 100%; padding: 8px 16px 10px; gap: 8px; }
+  .ed-top { order: -3; position: sticky; top: 0; z-index: 2; background: var(--navy-800); padding-bottom: 2px; }
+  .ed-top h2 { font-size: 22px; }
+  .hint { order: -2; font-size: 12px; }
+  .wave-wrap { order: -1; }
+  #wave { height: 120px; }
+  .field { flex-basis: 220px; }
+  .field input { height: 40px; font-size: 16px; }
+  .field label { font-size: 11px; }
+  .chips button { height: 34px; }
+  .times { font-size: 13px; }
+  .ng .mini-w { height: 38px; }
 }
 @container (max-height: 80px) { .tile .status { display: none; } }
 @media (prefers-reduced-motion: reduce) {
@@ -403,8 +427,13 @@ input[type=range]::-moz-range-thumb { width: 30px; height: 30px; border-radius: 
       <div class="field"><label for="edTag">Tag</label><input id="edTag" type="text" maxlength="20" list="edTagList" autocomplete="off" autocapitalize="words"><datalist id="edTagList"></datalist></div>
     </div>
     <div id="edChips" class="chips" aria-label="Existing tags"></div>
+    <p class="hint">Drag the red handles to trim the start and the end. Use the buttons below for fine adjustments.</p>
     <div class="wave-wrap"><canvas id="wave" height="180" aria-label="Waveform. Drag the red handles to trim."></canvas></div>
     <div id="edTimes" class="times"></div>
+    <div class="nudge">
+      <div class="ng"><span>Start</span><button type="button" class="mini mini-w" data-nudge="start" data-d="-0.05" aria-label="Start earlier">&minus;</button><button type="button" class="mini mini-w" data-nudge="start" data-d="0.05" aria-label="Start later">+</button></div>
+      <div class="ng"><span>End</span><button type="button" class="mini mini-w" data-nudge="end" data-d="-0.05" aria-label="End earlier">&minus;</button><button type="button" class="mini mini-w" data-nudge="end" data-d="0.05" aria-label="End later">+</button></div>
+    </div>
     <div class="ed-row">
       <button id="edPrev" class="mini mini-w" type="button">Preview</button>
       <button id="edAuto" class="mini mini-w" type="button">Auto-trim</button>
@@ -1060,9 +1089,9 @@ if (typeof module !== 'undefined') module.exports = Engine;
   }
   function drawWave() {
     if (!ED) return;
-    var cv = $('#wave'), dpr = window.devicePixelRatio || 1, cssW = cv.clientWidth;
+    var cv = $('#wave'), dpr = window.devicePixelRatio || 1, cssW = cv.clientWidth, cssH = cv.clientHeight || 180;
     if (!cssW) return;
-    cv.width = Math.round(cssW * dpr); cv.height = Math.round(180 * dpr);
+    cv.width = Math.round(cssW * dpr); cv.height = Math.round(cssH * dpr);
     var g = cv.getContext('2d'), W = cv.width, H = cv.height, dur = ED.c.buf.duration;
     var bins = Math.max(20, Math.floor(cssW / 3));
     if (!ED.peaks || ED.peaks.length !== bins) ED.peaks = E.peaks(chans(ED.c.buf), bins);
@@ -1077,11 +1106,17 @@ if (typeof module !== 'undefined') module.exports = Engine;
     g.fillStyle = 'rgba(7,23,58,0.55)'; g.fillRect(0, 0, s, H); g.fillRect(e, 0, W - e, H);
     var acc = (getComputedStyle(document.documentElement).getPropertyValue('--accent') || '').trim() || '#C60C30';
     g.fillStyle = acc;
-    [s, e].forEach(function (x) {
-      g.fillRect(x - 1.5 * dpr, 0, 3 * dpr, H);
-      var gw = 18 * dpr, gh = 44 * dpr;
-      g.fillRect(x - gw / 2, mid - gh / 2, gw, gh);
-      g.fillStyle = '#fff'; g.fillRect(x - 1 * dpr, mid - 12 * dpr, 2 * dpr, 24 * dpr); g.fillStyle = acc;
+    [s, e].forEach(function (x, k) {
+      g.fillStyle = acc;
+      g.fillRect(x - 2 * dpr, 0, 4 * dpr, H);
+      var gw = 30 * dpr, gh = 72 * dpr, gx = Math.min(W - gw, Math.max(0, x - gw / 2));
+      g.beginPath(); (g.roundRect ? g.roundRect(gx, mid - gh / 2, gw, gh, 8 * dpr) : g.rect(gx, mid - gh / 2, gw, gh)); g.fill();
+      g.fillStyle = '#fff';
+      [-5, 0, 5].forEach(function (d) { g.fillRect(gx + gw / 2 + d * dpr - 1 * dpr, mid - 16 * dpr, 2 * dpr, 32 * dpr); });
+      g.font = '700 ' + Math.round(12 * dpr) + 'px sans-serif'; g.textAlign = k ? 'right' : 'left';
+      g.fillStyle = acc; var lw = g.measureText(k ? 'END' : 'START').width + 12 * dpr;
+      g.fillRect(k ? x - lw : x, 0, lw, 20 * dpr);
+      g.fillStyle = '#fff'; g.fillText(k ? 'END' : 'START', k ? x - 6 * dpr : x + 6 * dpr, 14 * dpr);
     });
   }
   function moveHandle(ev) {
@@ -1218,6 +1253,13 @@ if (typeof module !== 'undefined') module.exports = Engine;
   });
   cv.addEventListener('pointermove', function (e) { if (ED && ED.drag) moveHandle(e); });
   ['pointerup', 'pointercancel'].forEach(function (n) { cv.addEventListener(n, function () { if (ED) ED.drag = null; }); });
+  $('#editor').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-nudge]'); if (!b || !ED) return;
+    var d = Number(b.dataset.d), dur = ED.c.buf.duration;
+    if (b.dataset.nudge === 'start') ED.start = Math.max(0, Math.min(ED.start + d, ED.end - 0.05));
+    else ED.end = Math.min(dur, Math.max(ED.end + d, ED.start + 0.05));
+    drawWave(); updateTimes();
+  });
   $('#edTag').addEventListener('input', refreshChips);
   $('#edChips').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
@@ -1291,7 +1333,11 @@ if (typeof module !== 'undefined') module.exports = Engine;
   window.__sb = { S: S, voices: voices, E: E, press: press };
   boot();
   try {
-    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(function () {});
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+      var hadCtl = !!navigator.serviceWorker.controller;
+      navigator.serviceWorker.addEventListener('controllerchange', function () { if (hadCtl && !voices.size && !sessionStorage.getItem('sbReloaded')) { try { sessionStorage.setItem('sbReloaded', '1'); } catch (e) {} location.reload(); } });
+      navigator.serviceWorker.register('sw.js').catch(function () {});
+    }
   } catch (e) { /* optional */ }
 })();
 
