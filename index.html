@@ -356,6 +356,15 @@ a.btn { display: flex; }
 .h-name { font-family: var(--display); font-weight: 800; font-size: 40px; letter-spacing: 0.03em; line-height: 1; }
 .h-sub { font-size: 16px; font-weight: 600; opacity: 0.88; }
 
+/* Channel numbers screen */
+.ch-rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 8px 16px; }
+.ch-rows h3 { grid-column: 1 / -1; margin: 10px 0 0; font-family: var(--display); font-weight: 800; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-soft); }
+.ch-row { display: flex; align-items: center; gap: 10px; min-height: 48px; }
+.ch-n { flex: 1; min-width: 0; font-size: 17px; font-weight: 600; display: flex; flex-direction: column; }
+.ch-n small { font-size: 12px; font-weight: 500; color: var(--muted); }
+.ch-row input { width: 112px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--navy-900); color: #fff; font: inherit; font-size: 20px; font-weight: 700; text-align: center; -webkit-user-select: text; user-select: text; touch-action: manipulation; }
+.ch-row input::placeholder { color: rgba(255, 255, 255, 0.35); font-weight: 500; }
+
 /* Games */
 .games { gap: 10px; }
 .g-top { display: flex; align-items: center; gap: 12px; flex: none; min-height: 50px; }
@@ -376,7 +385,7 @@ a.btn { display: flex; }
 .g-msg.warn { background: #5B2A1A; color: #FFD9C7; }
 .g-list { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 470px), 1fr)); gap: 10px; align-content: start; grid-auto-rows: max-content; padding-bottom: 14px; }
 .g-sec { grid-column: 1 / -1; margin: 8px 0 0; font-family: var(--display); font-weight: 800; font-size: 22px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-soft); }
-.g-card { display: grid; grid-template-columns: 104px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 16px; min-height: 92px; border-radius: 18px; background: var(--navy-800); border: 1px solid var(--line); }
+.g-card { display: grid; grid-template-columns: 126px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 16px; min-height: 92px; border-radius: 18px; background: var(--navy-800); border: 1px solid var(--line); }
 .g-card.fav { border-left: 7px solid var(--accent); background: var(--navy-700); }
 .g-card.now { box-shadow: inset 0 0 0 2px var(--accent-soft); }
 .g-card.past, .g-card.final, .g-card.off { opacity: 0.55; }
@@ -397,6 +406,13 @@ a.btn { display: flex; }
 .g-ch { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; max-width: 190px; }
 .ch { padding: 6px 12px; border-radius: 12px; background: #fff; color: var(--navy-900); font-weight: 700; font-size: 15px; white-space: nowrap; }
 .ch.more { background: rgba(255, 255, 255, 0.16); color: #fff; }
+.ch { display: inline-flex; align-items: center; gap: 8px; }
+.ch i { font-style: normal; }
+.ch.num { padding: 4px 12px 4px 6px; }
+.ch.num b { font-family: var(--display); font-weight: 800; font-size: 26px; line-height: 1; background: var(--navy-900); color: #fff; border-radius: 9px; padding: 4px 9px; min-width: 2ch; text-align: center; }
+.ch.num i { font-weight: 700; font-size: 14px; max-width: 9em; white-space: normal; line-height: 1.05; }
+.ch.stream { background: transparent; color: #fff; border: 1px dashed rgba(255, 255, 255, 0.45); flex-direction: column; align-items: flex-start; gap: 0; padding: 3px 10px; }
+.ch.stream u { text-decoration: none; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .ch.none { background: transparent; color: var(--muted); border: 1px dashed var(--line); font-weight: 600; font-size: 14px; }
 
 @media (max-width: 700px) {
@@ -408,6 +424,7 @@ a.btn { display: flex; }
   .g-h { font-size: 28px; }
   .g-btn { height: 40px; padding: 0 12px; border-radius: 20px; }
   .g-rl, .g-upd { display: none; }
+  .ch.num b { font-size: 22px; }
   .g-h { margin-right: auto; }
   .g-days, .g-sports { min-height: 40px; }
   .g-tools { flex-wrap: wrap; gap: 8px; }
@@ -473,6 +490,10 @@ a.btn { display: flex; }
     </a>
     <h1 class="g-h">GAMES</h1>
     <span id="gUpdated" class="g-upd" aria-live="polite"></span>
+    <button id="gChannels" class="btn g-btn" type="button" aria-label="Channel numbers">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M9 9v4M12 9v4M15 9v4" stroke-width="1.6"/></svg>
+      <span class="g-rl">Channels</span>
+    </button>
     <button id="gRefresh" class="btn g-btn" type="button">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 11-2.4-5.7"/><path d="M20 4v5h-5"/></svg>
       <span class="g-rl">Refresh</span>
@@ -562,6 +583,19 @@ a.btn { display: flex; }
       <div id="segMode" class="seg" role="group" aria-label="Playback mode"></div>
     </div>
   </section>
+</div>
+
+<div id="chSheet" class="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="chHead">
+    <div class="ed-top">
+      <h2 id="chHead">Channel numbers</h2>
+      <span class="ed-spacer"></span>
+      <button id="chReset" class="mini mini-w mini-danger" type="button">Reset all</button>
+      <button id="chDone" class="mini mini-w mini-red" type="button">Done</button>
+    </div>
+    <p class="hint">These start from DirecTV&rsquo;s standard lineup. If a number is wrong for your account, change it here. It is saved on this device and used everywhere on the Games page.</p>
+    <div id="chRows" class="ch-rows"></div>
+  </div>
 </div>
 
 <div id="editor" class="modal" hidden>
@@ -828,6 +862,46 @@ if (typeof module !== 'undefined') module.exports = Engine;
   function saveStore() { try { localStorage.setItem(KEY, JSON.stringify(G.store)); } catch (e) { /* storage full or blocked: fine */ } }
   function fetchedToday(rec) { return !!rec && ymdOf(rec.t) === ymdOf(Date.now()); }
 
+
+  /* ---------- DirecTV channel numbers ----------
+     Numbers marked verified come from DirecTV's own channel lineup. The New York locals use their usual
+     over-the-air numbers, which is how DirecTV lists locals, but they are not in that document.
+     Every number can be changed on the Channels screen; the bar's own lineup wins. */
+  var CHKEY = 'fulton.channels.v1';
+  // [key, label, number, group, verified, extra aliases]
+  var CH = [
+    ['espn', 'ESPN', '206', 'sports', 1], ['espn2', 'ESPN2', '209', 'sports', 1], ['espnu', 'ESPNU', '208', 'sports', 1],
+    ['espnews', 'ESPNews', '207', 'sports', 1, ['espnnews']], ['fs1', 'FS1', '219', 'sports', 1, ['foxsports1']], ['fs2', 'FS2', '618', 'sports', 1, ['foxsports2']],
+    ['tnt', 'TNT', '245', 'sports', 1], ['tbs', 'TBS', '247', 'sports', 1], ['trutv', 'truTV', '246', 'sports', 1],
+    ['usa', 'USA Network', '242', 'sports', 1, ['usanet', 'usanetwork']],
+    ['golf', 'Golf Channel', '218', 'sports', 1, ['golfchnl', 'golfchannel']], ['tennis', 'Tennis Channel', '217', 'sports', 1, ['tennischannel', 'tennischnl']],
+    ['cbssn', 'CBS Sports Network', '221', 'sports', 1, ['cbssportsnetwork']],
+    ['nfln', 'NFL Network', '212', 'sports', 1, ['nflnetwork']], ['nflrz', 'NFL RedZone', '211', 'sports', 1, ['nflredzone']],
+    ['mlbn', 'MLB Network', '213', 'sports', 1, ['mlbnetwork']], ['nbatv', 'NBA TV', '216', 'sports', 1], ['nhln', 'NHL Network', '215', 'sports', 1, ['nhlnetwork']],
+    ['btn', 'Big Ten Network', '610', 'sports', 1, ['bigtennetwork']], ['secn', 'SEC Network', '611', 'sports', 1, ['secnetwork']], ['accn', 'ACC Network', '612', 'sports', 1, ['accnetwork']],
+    ['cbs', 'CBS', '2', 'local', 0, ['wcbs']], ['nbc', 'NBC', '4', 'local', 0, ['wnbc']], ['fox', 'FOX', '5', 'local', 0, ['wnyw']], ['abc', 'ABC', '7', 'local', 0, ['wabc']],
+    ['cw', 'The CW', '11', 'local', 0, ['wpix']],
+    ['univision', 'Univision', '402', 'es', 1], ['telemundo', 'Telemundo', '406', 'es', 1], ['universo', 'Universo', '410', 'es', 1, ['nbcuniverso']],
+    ['unimas', 'UniMás', '408', 'es', 1], ['tudn', 'TUDN', '464', 'es', 1, ['univisiondeportes']], ['foxdeportes', 'FOX Deportes', '465', 'es', 1], ['espndeportes', 'ESPN Deportes', '466', 'es', 1],
+    ['msg', 'MSG', '634', 'rsn', 1], ['yes', 'YES Network', '631', 'rsn', 1], ['sny', 'SNY', '639', 'rsn', 1], ['nesn', 'NESN', '628', 'rsn', 1],
+    ['espnplus', 'ESPN+', '', 'stream', 1, ['espn+', 'espn3']], ['peacock', 'Peacock', '', 'stream', 1], ['prime', 'Prime Video', '', 'stream', 1, ['primevideo', 'amazonprimevideo', 'amazon']],
+    ['paramount', 'Paramount+', '', 'stream', 1, ['paramount+']], ['apple', 'Apple TV', '', 'stream', 1, ['appletv+', 'appletv']], ['netflix', 'Netflix', '', 'stream', 1],
+    ['max', 'Max', '', 'stream', 1, ['hbomax']], ['foxone', 'FOX One', '', 'stream', 1], ['nflplus', 'NFL+', '', 'stream', 1, ['nfl+']], ['youtube', 'YouTube', '', 'stream', 1]
+  ];
+  var CHGROUPS = [['sports', 'Sports channels'], ['local', 'New York locals'], ['es', 'Spanish-language'], ['rsn', 'Regional sports'], ['stream', 'Streaming only (no channel number)']];
+  var CHBYKEY = {}, CHALIAS = {};
+  CH.forEach(function (c) { CHBYKEY[c[0]] = c; CHALIAS[c[0]] = c[0]; (c[5] || []).forEach(function (a) { CHALIAS[a] = c[0]; }); });
+  var chOver = {};
+  function chLoad() { try { chOver = JSON.parse(localStorage.getItem(CHKEY) || '{}') || {}; } catch (e) { chOver = {}; } }
+  function chSave() { try { localStorage.setItem(CHKEY, JSON.stringify(chOver)); } catch (e) { /* fine */ } }
+  function normKey(n) { return String(n || '').toLowerCase().replace(/[^a-z0-9+]/g, ''); }
+  // What to show for a channel name from the feed: {name, num, stream, known}
+  function chInfo(raw) {
+    var k = normKey(raw), ck = CHALIAS[k] || k, c = CHBYKEY[ck];
+    var num = Object.prototype.hasOwnProperty.call(chOver, ck) ? chOver[ck] : (c ? c[2] : '');
+    return { key: ck, name: c ? c[1] : String(raw).trim(), num: num, stream: !!(c && c[3] === 'stream' && !num), known: !!c };
+  }
+
   /* ---------- reading the feed ---------- */
   function uniq(list, n) { n = (n || '').trim(); if (n && list.indexOf(n) < 0) list.push(n); }
   function channelsOf(ev) {
@@ -906,7 +980,8 @@ if (typeof module !== 'undefined') module.exports = Engine;
   }
   function matches(e) {
     if (!G.q) return true;
-    return G.q.toLowerCase().split(/\s+/).filter(Boolean).every(function (w) { return e.hay.indexOf(w) >= 0; });
+    var hay = e.hay + ' ' + e.ch.map(function (n) { var i = chInfo(n); return i.name + ' ' + i.num; }).join(' ').toLowerCase();
+    return G.q.toLowerCase().split(/\s+/).filter(Boolean).every(function (w) { return hay.indexOf(w) >= 0; });
   }
   function phase(e, now) {
     if (e.off) return 'off';
@@ -918,8 +993,16 @@ if (typeof module !== 'undefined') module.exports = Engine;
   }
   function chHtml(e) {
     if (!e.ch.length) return '<span class="ch none">Channel TBA</span>';
-    var show = e.ch.slice(0, 4), more = e.ch.length - show.length;
-    return show.map(function (c) { return '<span class="ch">' + esc(c) + '</span>'; }).join('') + (more > 0 ? '<span class="ch more">+' + more + '</span>' : '');
+    var seen = {}, list = [];
+    e.ch.forEach(function (n) { var i = chInfo(n); if (!seen[i.key]) { seen[i.key] = 1; list.push(i); } });
+    // channels with a number first, streaming and unknown after
+    list.sort(function (a, b) { return (b.num ? 1 : 0) - (a.num ? 1 : 0); });
+    var show = list.slice(0, 4), more = list.length - show.length;
+    return show.map(function (i) {
+      if (i.num) return '<span class="ch num"><b>' + esc(i.num) + '</b><i>' + esc(i.name) + '</i></span>';
+      if (i.stream) return '<span class="ch stream"><i>' + esc(i.name) + '</i><u>streaming</u></span>';
+      return '<span class="ch"><i>' + esc(i.name) + '</i></span>';
+    }).join('') + (more > 0 ? '<span class="ch more">+' + more + '</span>' : '');
   }
   function teamHtml(t) {
     return '<div class="g-team">' + (t.logo ? '<img src="' + esc(t.logo) + '" alt="" loading="lazy" width="24" height="24" onerror="this.style.display=\'none\'">' : '<i class="g-nologo"></i>') +
@@ -986,6 +1069,49 @@ if (typeof module !== 'undefined') module.exports = Engine;
   $('#gQ').addEventListener('keydown', function (e) { if (e.key === 'Enter') e.target.blur(); });
   $('#gClear').addEventListener('click', function () { $('#gQ').value = ''; G.q = ''; render(); $('#gQ').focus(); });
   $('#gRefresh').addEventListener('click', function () { load(G.day, true); });
+
+  /* ---------- channel numbers screen ---------- */
+  function seenUnknown() {
+    var out = {}, k;
+    events().forEach(function (e) { e.ch.forEach(function (n) { var i = chInfo(n); if (!i.known && !Object.prototype.hasOwnProperty.call(chOver, i.key)) out[i.key] = i.name; }); });
+    Object.keys(chOver).forEach(function (k2) { if (!CHBYKEY[k2] && !out[k2]) out[k2] = chLabels[k2] || k2; });
+    return out;
+  }
+  var chLabels = {};
+  function chRow(key, label, def, note) {
+    var v = Object.prototype.hasOwnProperty.call(chOver, key) ? chOver[key] : def;
+    return '<label class="ch-row"><span class="ch-n">' + esc(label) + (note ? '<small>' + note + '</small>' : '') + '</span><input type="text" inputmode="text" maxlength="12" autocomplete="off" data-ck="' + esc(key) + '" data-def="' + esc(def) + '" value="' + esc(v) + '" placeholder="' + (def ? esc(def) : 'none') + '"></label>';
+  }
+  function openChannels() {
+    var un = seenUnknown(), html = '';
+    var keys = Object.keys(un);
+    if (keys.length) {
+      keys.forEach(function (k) { chLabels[k] = un[k]; });
+      html += '<h3>On the schedule, no number yet</h3>' + keys.map(function (k) { return chRow(k, un[k], '', 'Type the DirecTV number'); }).join('');
+    }
+    CHGROUPS.forEach(function (g) {
+      var rows = CH.filter(function (c) { return c[3] === g[0]; });
+      html += '<h3>' + esc(g[1]) + '</h3>' + rows.map(function (c) { return chRow(c[0], c[1], c[2], g[0] === 'local' ? 'standard NYC number, check it once' : ''); }).join('');
+    });
+    $('#chRows').innerHTML = html; $('#chSheet').hidden = false;
+  }
+  $('#gChannels').addEventListener('click', openChannels);
+  $('#chDone').addEventListener('click', function () { $('#chSheet').hidden = true; render(); });
+  $('#chReset').addEventListener('click', function () {
+    if (!$('#chReset').classList.contains('armed')) {
+      $('#chReset').classList.add('armed'); $('#chReset').textContent = 'Tap again to reset';
+      setTimeout(function () { $('#chReset').classList.remove('armed'); $('#chReset').textContent = 'Reset all'; }, 3000); return;
+    }
+    $('#chReset').classList.remove('armed'); $('#chReset').textContent = 'Reset all';
+    chOver = {}; chSave(); openChannels();
+  });
+  $('#chRows').addEventListener('input', function (e) {
+    var el = e.target; if (!el.dataset || !el.dataset.ck) return;
+    var v = el.value.trim();
+    if (v === el.dataset.def) delete chOver[el.dataset.ck]; else if (v === '' && !el.dataset.def) delete chOver[el.dataset.ck]; else chOver[el.dataset.ck] = v;
+    chSave();
+  });
+
   setInterval(function () { if (!$('#games').hidden && document.visibilityState === 'visible') render(); }, 60000);
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible' && !$('#games').hidden) Games.show();
@@ -993,7 +1119,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
 
   var Games = {
     show: function () {
-      loadStore(); var before = G.day; buildDays();
+      chLoad(); loadStore(); var before = G.day; buildDays();
       if (before && before !== G.day) G.rec = null;
       render(); load(G.day, false);
     },
@@ -1004,7 +1130,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
       var n = 0; Object.keys(rec.ok).forEach(function (k) { rec.ok[k].forEach(function (e) { if (!e.multi) n++; }); });
       return n;
     },
-    _test: { normalize: normalize, LEAGUES: LEAGUES }
+    _test: { normalize: normalize, LEAGUES: LEAGUES, chInfo: chInfo }
   };
   window.Games = Games;
 })();
