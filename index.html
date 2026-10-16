@@ -1242,7 +1242,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
     if (!warned) { warned = true; toast("Couldn't save to this iPad. Clips may be lost when the app closes.", 5000); }
   }
   function meta(c) {
-    return { id: c.id, name: c.name, team: c.team || 'bills', tag: c.tag, order: c.order, vol: c.vol, mode: c.mode, trimStart: c.trimStart, trimEnd: c.trimEnd, lufs: c.lufs, peakDb: c.peakDb, gainDb: c.gainDb, dur: c.dur };
+    return { id: c.id, name: c.name, team: c.team || 'bills', tag: c.tag, order: c.order, vol: c.vol, mode: c.mode, trimStart: c.trimStart, trimEnd: c.trimEnd, lufs: c.lufs, peakDb: c.peakDb, gainDb: c.gainDb, dur: c.dur, long: !!c.long, peaks: c.peaks || undefined };
   }
   function saveClip(c) { if (!S.persist) return Promise.resolve(); return DB.put('clips', meta(c)).catch(fail); }
   var saveTimers = {};
@@ -1294,8 +1294,68 @@ if (typeof module !== 'undefined') module.exports = Engine;
     $('#btnStop').classList.toggle('live', voices.size > 0);
   }
 
+  /* ---------- long clips: played from stored bytes through an audio element, not kept decoded ---------- */
+  var LONG = 60, MAXLEN = 600;
+  function sniffMime(ab) {
+    var u = new Uint8Array(ab, 0, 12), t = String.fromCharCode.apply(null, u);
+    if (t.slice(0, 3) === 'ID3' || (u[0] === 0xFF && (u[1] & 0xE0) === 0xE0)) return 'audio/mpeg';
+    if (t.slice(0, 4) === 'RIFF') return 'audio/wav';
+    if (t.slice(4, 8) === 'ftyp') return 'audio/mp4';
+    if (t.slice(0, 4) === 'OggS') return 'audio/ogg';
+    if (t.slice(0, 4) === 'fLaC') return 'audio/flac';
+    return '';
+  }
+  function prepareLong(c, ab) {
+    var el = new Audio();
+    el.preload = 'auto';
+    c.url = URL.createObjectURL(new Blob([ab], { type: sniffMime(ab) }));
+    el.src = c.url;
+    el.addEventListener('loadedmetadata', function () { try { el.currentTime = c.trimStart; } catch (e) { /* later */ } }, { once: true });
+    c.el = el;
+    try {
+      var node = ctx.createMediaElementSource(el), g = ctx.createGain();
+      node.connect(g); g.connect(master); c.node = { src: node, g: g };
+    } catch (e) { c.el = null; }
+    try { el.load(); } catch (e) { /* ignore */ }
+  }
+  function startLong(c, o) {
+    var key = o.key || c.id, start = o.start != null ? o.start : c.trimStart, end = o.end != null ? o.end : c.trimEnd;
+    var mode = o.mode || c.mode, gainDb = o.gainDb != null ? o.gainDb : c.gainDb, lin = E.dbToLin(gainDb + E.volDb(c.vol));
+    var el = c.el, node = c.node;
+    if (!el || !node) { toast("Couldn't play that clip."); return; }
+    var tok = c.playTok = (c.playTok || 0) + 1, g = node.g, t0 = ctx.currentTime, fade = 0.02, iv = null, v;
+    g.gain.cancelScheduledValues(t0); g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(lin, t0 + 0.004);
+    try { if (Math.abs(el.currentTime - start) > 0.05) el.currentTime = start; } catch (e) { /* not ready */ }
+    el.loop = false;
+    function finish() {
+      if (c.playTok !== tok) return;
+      clearInterval(iv); el.pause();
+      try { el.currentTime = c.trimStart; } catch (e) { /* ignore */ }
+      if (voices.get(key) === v) { voices.delete(key); setPlayingUI(key, false); updateNow(); }
+    }
+    v = { src: { stop: function (when) { clearInterval(iv); setTimeout(finish, Math.max(0, (when - ctx.currentTime) * 1000)); } }, g: g, token: ++tokenN, key: key };
+    voices.set(key, v);
+    var p = el.play();
+    if (p && p.catch) p.catch(function () { if (c.playTok === tok) { finish(); toast("Couldn't play that clip."); } });
+    iv = setInterval(function () {
+      if (c.playTok !== tok) { clearInterval(iv); return; }
+      var t = el.currentTime;
+      if (mode === 'loop') {
+        if (t >= end - 0.01 || el.ended) { try { el.currentTime = start; } catch (e) { /* ignore */ } if (el.paused) el.play(); }
+        return;
+      }
+      if (t >= end - fade || el.ended) {
+        clearInterval(iv);
+        var n = ctx.currentTime; g.gain.cancelScheduledValues(n); g.gain.setValueAtTime(g.gain.value, n); g.gain.linearRampToValueAtTime(0, n + fade);
+        setTimeout(finish, fade * 1000 + 10);
+      }
+    }, 10);
+    setPlayingUI(key, true, mode === 'loop');
+    updateNow();
+  }
   function startVoice(c, o) {
     o = o || {};
+    if (c.long) { startLong(c, o); return; }
     var key = o.key || c.id;
     var start = o.start != null ? o.start : c.trimStart, end = o.end != null ? o.end : c.trimEnd;
     var mode = o.mode || c.mode, gainDb = o.gainDb != null ? o.gainDb : c.gainDb;
@@ -1343,7 +1403,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
 
   function press(id) {
     var c = byId(id);
-    if (!c || !c.buf) return;
+    if (!c || !(c.buf || c.el)) return;
     resumeCtx();
     if (S.edit) {
       if (S.selected !== id) { select(id); return; }
@@ -1362,16 +1422,18 @@ if (typeof module !== 'undefined') module.exports = Engine;
   /* ---------- import ---------- */
   async function addClip(ab, name, tag) {
     var buf = await decode(ab.slice(0));
-    if (buf.duration > 180) throw new Error('too long');
+    if (buf.duration > MAXLEN) throw new Error('too long');
     var chs = chans(buf), act = E.findActive(chs, buf.sampleRate);
     var m = E.measure(chs, buf.sampleRate, act.start, act.end);
     var c = {
       id: uid(), name: name, team: S.team, tag: tag, order: nextOrder(), vol: 80, mode: 'full',
-      trimStart: act.start, trimEnd: act.end, lufs: m.lufs, peakDb: m.peakDb, gainDb: E.autoGain(m.lufs), dur: buf.duration, buf: buf
+      trimStart: act.start, trimEnd: act.end, lufs: m.lufs, peakDb: m.peakDb, gainDb: E.autoGain(m.lufs), dur: buf.duration
     };
+    if (buf.duration > LONG) { c.long = true; c.peaks = Array.from(E.peaks(chs, 800), function (x) { return Math.round(x * 1000) / 1000; }); } else c.buf = buf;
     if (S.persist) {
       try { await DB.put('audio', ab, c.id); await DB.put('clips', meta(c)); } catch (e) { fail(); S.persist = false; c.bytes = ab; }
     } else c.bytes = ab;
+    if (c.long) prepareLong(c, ab);
     S.clips.push(c);
     return c;
   }
@@ -1396,7 +1458,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
       } catch (e) { bad.push(f.name); }
     }
     fixTags(); await saveSettings(); renderAll();
-    if (bad.length) toast(ok + ' added. Could not read: ' + bad.slice(0, 2).join(', ') + (bad.length > 2 ? '…' : '') + '. Clips must be audio files under 3 minutes.', 6000);
+    if (bad.length) toast(ok + ' added. Could not read: ' + bad.slice(0, 2).join(', ') + (bad.length > 2 ? '…' : '') + '. Clips must be audio files under 10 minutes.', 6000);
     else toast(ok + (ok === 1 ? ' clip added and leveled' : ' clips added and leveled'));
   }
   async function loadDemo() {
@@ -1451,9 +1513,10 @@ if (typeof module !== 'undefined') module.exports = Engine;
         if (byId(m.id)) continue;
         toast('Restoring ' + (i + 1) + ' of ' + head.clips.length, 60000);
         await tick();
-        var buf = await decode(bytes.slice(0));
-        var c = { id: m.id, name: m.name, team: m.team || 'bills', tag: m.tag, order: nextOrder(), vol: m.vol, mode: m.mode, trimStart: m.trimStart, trimEnd: m.trimEnd, lufs: m.lufs, peakDb: m.peakDb, gainDb: m.gainDb, dur: m.dur, buf: buf };
+        var buf = m.long ? null : await decode(bytes.slice(0));
+        var c = { id: m.id, name: m.name, team: m.team || 'bills', tag: m.tag, order: nextOrder(), vol: m.vol, mode: m.mode, trimStart: m.trimStart, trimEnd: m.trimEnd, lufs: m.lufs, peakDb: m.peakDb, gainDb: m.gainDb, dur: m.dur, buf: buf, long: !!m.long, peaks: m.peaks };
         if (S.persist) { try { await DB.put('audio', bytes, c.id); await DB.put('clips', meta(c)); } catch (e) { fail(); } } else c.bytes = bytes;
+        if (c.long) prepareLong(c, bytes);
         S.clips.push(c); added++;
       }
       var to = head.settings && (head.settings.tagOrders || (head.settings.tagOrder && { bills: head.settings.tagOrder }));
@@ -1612,16 +1675,31 @@ if (typeof module !== 'undefined') module.exports = Engine;
   var ED = null, delT;
   function fmt(s) { return s.toFixed(2) + 's'; }
   function updateTimes() {
-    $('#edTimes').innerHTML = 'Start <b>' + fmt(ED.start) + '</b> End <b>' + fmt(ED.end) + '</b> Length <b>' + fmt(ED.end - ED.start) + '</b> of ' + fmt(ED.c.buf.duration) + (isFinite(ED.c.lufs) ? ' Source loudness <b>' + ED.c.lufs.toFixed(0) + ' LUFS</b>' : '');
+    $('#edTimes').innerHTML = 'Start <b>' + fmt(ED.start) + '</b> End <b>' + fmt(ED.end) + '</b> Length <b>' + fmt(ED.end - ED.start) + '</b> of ' + fmt(ED.dur) + (isFinite(ED.c.lufs) ? ' Source loudness <b>' + ED.c.lufs.toFixed(0) + ' LUFS</b>' : '');
+  }
+  function resamplePeaks(src, bins) {
+    var out = new Float32Array(bins), n = src.length || 1, i, j;
+    for (i = 0; i < bins; i++) {
+      var a = Math.floor(i * n / bins), b = Math.max(a + 1, Math.floor((i + 1) * n / bins)), mx = 0;
+      for (j = a; j < b && j < n; j++) if (src[j] > mx) mx = src[j];
+      out[i] = mx;
+    }
+    return out;
+  }
+  // The decoded audio of a long clip is only made when needed (auto-trim, preview level, saving a new trim).
+  async function edBuf() {
+    if (ED.c.buf) return ED.c.buf;
+    if (!ED.buf) { toast('Reading the clip\u2026', 8000); ED.buf = await decode((await getBytes(ED.c)).slice(0)); $('#toast').hidden = true; }
+    return ED.buf;
   }
   function drawWave() {
     if (!ED) return;
     var cv = $('#wave'), dpr = window.devicePixelRatio || 1, cssW = cv.clientWidth, cssH = cv.clientHeight || 180;
     if (!cssW) return;
     cv.width = Math.round(cssW * dpr); cv.height = Math.round(cssH * dpr);
-    var g = cv.getContext('2d'), W = cv.width, H = cv.height, dur = ED.c.buf.duration;
+    var g = cv.getContext('2d'), W = cv.width, H = cv.height, dur = ED.dur;
     var bins = Math.max(20, Math.floor(cssW / 3));
-    if (!ED.peaks || ED.peaks.length !== bins) ED.peaks = E.peaks(chans(ED.c.buf), bins);
+    if (!ED.peaks || ED.peaks.length !== bins) ED.peaks = ED.c.buf ? E.peaks(chans(ED.c.buf), bins) : resamplePeaks(ED.c.peaks || [], bins);
     var mx = 0, i; for (i = 0; i < bins; i++) if (ED.peaks[i] > mx) mx = ED.peaks[i];
     var sc = mx > 0 ? 1 / mx : 1, bw = W / bins, mid = H / 2, s = ED.start / dur * W, e = ED.end / dur * W;
     g.clearRect(0, 0, W, H);
@@ -1647,7 +1725,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
     });
   }
   function moveHandle(ev) {
-    var cv = $('#wave'), r = cv.getBoundingClientRect(), dur = ED.c.buf.duration;
+    var cv = $('#wave'), r = cv.getBoundingClientRect(), dur = ED.dur;
     var t = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width)) * dur;
     if (ED.drag === 'start') ED.start = Math.min(t, ED.end - 0.05); else ED.end = Math.max(t, ED.start + 0.05);
     drawWave(); updateTimes();
@@ -1662,7 +1740,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
   function openEditor(id) {
     var c = byId(id); if (!c) return;
     stopAll();
-    ED = { c: c, start: c.trimStart, end: c.trimEnd, drag: null, peaks: null };
+    ED = { c: c, start: c.trimStart, end: c.trimEnd, drag: null, peaks: null, buf: null, dur: c.buf ? c.buf.duration : c.dur };
     $('#edName').value = c.name; $('#edTag').value = c.tag;
     $('#edDelete').textContent = 'Delete clip'; $('#edDelete').classList.remove('armed');
     $('#edPrev').textContent = 'Preview';
@@ -1671,20 +1749,23 @@ if (typeof module !== 'undefined') module.exports = Engine;
     requestAnimationFrame(drawWave);
   }
   function closeEditor() { stopVoice('__prev'); $('#editor').hidden = true; ED = null; clearTimeout(delT); }
-  function previewEditor() {
+  async function previewEditor() {
     if (voices.has('__prev')) { stopVoice('__prev'); return; }
     resumeCtx(); stopAll();
-    var m = E.measure(chans(ED.c.buf), ED.c.buf.sampleRate, ED.start, ED.end);
+    var b = await edBuf(); if (!ED) return;
+    var m = E.measure(chans(b), b.sampleRate, ED.start, ED.end);
     startVoice(ED.c, { key: '__prev', start: ED.start, end: ED.end, mode: 'full', gainDb: E.autoGain(m.lufs) });
   }
-  function saveEditor() {
+  async function saveEditor() {
     var c = ED.c;
     c.name = $('#edName').value.trim().slice(0, 40) || c.name;
     c.tag = normTag($('#edTag').value);
     var changed = Math.abs(ED.start - c.trimStart) > 1e-4 || Math.abs(ED.end - c.trimEnd) > 1e-4;
     if (changed) {
+      var b = await edBuf();
       c.trimStart = ED.start; c.trimEnd = ED.end;
-      var m = E.measure(chans(c.buf), c.buf.sampleRate, c.trimStart, c.trimEnd);
+      if (c.el) { try { c.el.currentTime = c.trimStart; } catch (e) { /* later */ } }
+      var m = E.measure(chans(b), b.sampleRate, c.trimStart, c.trimEnd);
       c.lufs = m.lufs; c.peakDb = m.peakDb; c.gainDb = E.autoGain(m.lufs);
     }
     closeEditor(); fixTags(); saveClip(c); saveSettings(); renderAll();
@@ -1696,7 +1777,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
       clearTimeout(delT); delT = setTimeout(function () { if (ED) { $('#edDelete').classList.remove('armed'); $('#edDelete').textContent = 'Delete clip'; } }, 3000);
       return;
     }
-    closeEditor(); stopVoice(c.id);
+    closeEditor(); stopVoice(c.id); if (c.url) { try { URL.revokeObjectURL(c.url); } catch (e) { /* ignore */ } }
     S.clips = S.clips.filter(function (x) { return x.id !== c.id; });
     if (S.persist) { DB.del('clips', c.id).catch(fail); DB.del('audio', c.id).catch(fail); }
     var l = visible(); S.selected = l.length ? l[0].id : null;
@@ -1765,7 +1846,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
     if (v) { var t = ctx.currentTime; v.g.gain.cancelScheduledValues(t); v.g.gain.setValueAtTime(E.dbToLin(c.gainDb + E.volDb(c.vol)), t); }
   });
   $('#vol').addEventListener('change', function () {
-    var c = byId(S.selected); if (!c || !c.buf) return;
+    var c = byId(S.selected); if (!c || !(c.buf || c.el)) return;
     resumeCtx(); stopAll(); startVoice(c, { mode: 'full' });
   });
   $('#btnEditClip').addEventListener('click', function () { if (S.selected) openEditor(S.selected); });
@@ -1773,7 +1854,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
   var cv = $('#wave');
   cv.addEventListener('pointerdown', function (e) {
     if (!ED) return;
-    var r = cv.getBoundingClientRect(), x = e.clientX - r.left, dur = ED.c.buf.duration;
+    var r = cv.getBoundingClientRect(), x = e.clientX - r.left, dur = ED.dur;
     var sx = ED.start / dur * r.width, ex = ED.end / dur * r.width;
     ED.drag = Math.abs(x - sx) <= Math.abs(x - ex) ? 'start' : 'end';
     cv.setPointerCapture(e.pointerId); moveHandle(e);
@@ -1782,7 +1863,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
   ['pointerup', 'pointercancel'].forEach(function (n) { cv.addEventListener(n, function () { if (ED) ED.drag = null; }); });
   $('#editor').addEventListener('click', function (e) {
     var b = e.target.closest('[data-nudge]'); if (!b || !ED) return;
-    var d = Number(b.dataset.d), dur = ED.c.buf.duration;
+    var d = Number(b.dataset.d), dur = ED.dur;
     if (b.dataset.nudge === 'start') ED.start = Math.max(0, Math.min(ED.start + d, ED.end - 0.05));
     else ED.end = Math.min(dur, Math.max(ED.end + d, ED.start + 0.05));
     drawWave(); updateTimes();
@@ -1795,9 +1876,12 @@ if (typeof module !== 'undefined') module.exports = Engine;
   $('#edPrev').addEventListener('click', function () { if (ED) previewEditor(); });
   $('#edAuto').addEventListener('click', function () {
     if (!ED) return;
-    var a = E.findActive(chans(ED.c.buf), ED.c.buf.sampleRate); ED.start = a.start; ED.end = a.end; drawWave(); updateTimes();
+    edBuf().then(function (b) {
+      if (!ED) return;
+      var a = E.findActive(chans(b), b.sampleRate); ED.start = a.start; ED.end = a.end; drawWave(); updateTimes();
+    });
   });
-  $('#edReset').addEventListener('click', function () { if (!ED) return; ED.start = 0; ED.end = ED.c.buf.duration; drawWave(); updateTimes(); });
+  $('#edReset').addEventListener('click', function () { if (!ED) return; ED.start = 0; ED.end = ED.dur; drawWave(); updateTimes(); });
   $('#edEarlier').addEventListener('click', function () { if (ED) moveClip(ED.c.id, -1); });
   $('#edLater').addEventListener('click', function () { if (ED) moveClip(ED.c.id, 1); });
   $('#edDelete').addEventListener('click', function () { if (ED) deleteClip(); });
@@ -1850,7 +1934,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
         for (var i = 0; i < metas.length; i++) {
           var m = metas[i], ab = await DB.get('audio', m.id);
           if (!ab) continue;
-          try { m.buf = await decode(ab.slice(0)); m.team = m.team || 'bills'; S.clips.push(m); } catch (e) { /* skip unreadable clip */ }
+          try { m.team = m.team || 'bills'; if (m.long) prepareLong(m, ab); else m.buf = await decode(ab.slice(0)); S.clips.push(m); } catch (e) { /* skip unreadable clip */ }
         }
       } catch (e) { fail(); }
     } else toast("This browser can't keep clips between sessions. Use Back up before closing.", 6000);
