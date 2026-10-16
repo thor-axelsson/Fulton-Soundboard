@@ -140,7 +140,9 @@ input[type=text] { touch-action: manipulation; -webkit-user-select: text; user-s
 .tile .st-play { display: none !important; }
 .tile.playing .st-play { display: flex !important; }
 .tile.playing .st-idle { display: none !important; }
-.tile.playing { box-shadow: 0 0 0 4px #fff, 0 0 40px 6px rgba(255, 255, 255, 0.35); }
+.tile.playing { box-shadow: 0 0 0 3px var(--navy-900), 0 0 0 7px #fff, 0 0 40px 8px rgba(255, 255, 255, 0.35); }
+.tile .cdot { position: absolute; top: 8px; right: 8px; width: 16px; height: 16px; border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.55); z-index: 1; }
+.compact .tile .cdot { top: 6px; right: 6px; width: 13px; height: 13px; }
 .tile .bar { position: absolute; left: 0; bottom: 0; height: 7px; width: 0; background: var(--fg); opacity: 0.9; display: none; }
 .tile.playing .bar { display: block; animation: fill var(--dur) linear forwards; }
 .tile.playing.looping .bar { animation-iteration-count: infinite; }
@@ -167,7 +169,7 @@ input[type=text] { touch-action: manipulation; -webkit-user-select: text; user-s
 .big.ghost { background: transparent; border: 2px solid rgba(255, 255, 255, 0.4); }
 
 /* Edit drawer */
-.panel { flex: none; height: 184px; border-radius: 20px; background: var(--navy-800); padding: 14px; display: flex; gap: 14px; }
+.panel { flex: none; height: 196px; border-radius: 20px; background: var(--navy-800); padding: 14px; display: flex; gap: 14px; }
 .p-col { min-width: 0; display: flex; flex-direction: column; }
 .p-up { flex: none; width: 250px; gap: 8px; }
 .p-lay { flex: none; width: 330px; gap: 4px; justify-content: center; }
@@ -188,11 +190,12 @@ input[type=text] { touch-action: manipulation; -webkit-user-select: text; user-s
 .mini-danger { color: #FFB3C0; }
 .mini-danger.armed { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
 .cols-row, .i-vol { display: flex; align-items: center; gap: 12px; height: 44px; }
+.cols-row { height: 40px; }
 .lbl { width: 66px; flex: none; font-size: 15px; color: rgba(255, 255, 255, 0.7); }
 .seg { display: flex; flex: 1; height: 44px; border-radius: 22px; background: rgba(255, 255, 255, 0.08); padding: 3px; min-width: 0; }
 .seg button { flex: 1; min-width: 0; border: 0; border-radius: 19px; background: transparent; font-size: 15px; font-weight: 600; padding: 0 4px; white-space: nowrap; }
 .seg button[aria-pressed=true] { background: #fff; color: var(--navy-900); }
-.sw { height: 44px; border: 0; background: transparent; display: flex; align-items: center; gap: 12px; padding: 0; text-align: left; font-size: 15px; }
+.sw { height: 40px; border: 0; background: transparent; display: flex; align-items: center; gap: 12px; padding: 0; text-align: left; font-size: 15px; }
 .sw i { flex: none; width: 52px; height: 30px; border-radius: 15px; background: rgba(255, 255, 255, 0.25); padding: 3px; display: flex; }
 .sw i b { width: 24px; height: 24px; border-radius: 12px; background: #fff; }
 .sw[aria-pressed=true] i { background: var(--accent); justify-content: flex-end; }
@@ -260,6 +263,7 @@ input[type=range]::-moz-range-thumb { width: 30px; height: 30px; border-radius: 
 
 /* Phones: portrait (narrow) */
 @media (max-width: 700px) {
+  .swatches { grid-template-columns: repeat(4, 1fr); }
   .panel { padding: 10px; gap: 8px; }
   .p-up .drop-s { display: none; }
   #app { gap: 8px; padding-block: calc(var(--safe-t) + 10px) calc(var(--safe-b) + 10px); padding-left: max(10px, env(safe-area-inset-left, 0px)); padding-right: max(10px, env(safe-area-inset-right, 0px)); }
@@ -355,6 +359,17 @@ a.btn { display: flex; }
 .h-games { background: linear-gradient(160deg, var(--royal), var(--blue)); }
 .h-name { font-family: var(--display); font-weight: 800; font-size: 40px; letter-spacing: 0.03em; line-height: 1; }
 .h-sub { font-size: 16px; font-weight: 600; opacity: 0.88; }
+
+/* Colors sheet */
+.cl-h { margin: 8px 0 8px; font-family: var(--display); font-weight: 800; font-size: 20px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cl-chips button { display: inline-flex; align-items: center; gap: 8px; }
+.cl-chips i { width: 12px; height: 12px; border-radius: 6px; display: inline-block; }
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 10px; margin-top: 10px; }
+.swt { height: 58px; border-radius: 14px; border: 0; background: var(--bg); color: var(--fg); font-family: var(--display); font-weight: 800; font-size: 26px; letter-spacing: 0.02em; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25); position: relative; }
+.swt.auto { font-family: var(--body); font-size: 15px; font-weight: 700; border: 2px dashed currentColor; }
+.swt[aria-pressed=true] { box-shadow: 0 0 0 3px var(--navy-800), 0 0 0 6px #fff; }
+.swt[aria-pressed=true]::after { content: ''; position: absolute; right: 6px; top: 6px; width: 16px; height: 16px; border-radius: 8px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%2307173A' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat; }
+.colors-note { font-size: 13px; }
 
 /* Channel numbers screen */
 .ch-rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 8px 16px; }
@@ -567,12 +582,14 @@ a.btn { display: flex; }
       </div>
       <button id="swGroup" class="sw" type="button" aria-pressed="false"><i><b></b></i><span>Group buttons by tag (All view)</span></button>
       <button id="swCut" class="sw" type="button" aria-pressed="true"><i><b></b></i><span>New clip cuts off the current one</span></button>
+      <button id="swColor" class="sw" type="button" aria-pressed="false"><i><b></b></i><span>Use my button colors</span></button>
     </div>
     <div class="p-col p-insp">
       <div class="i-head">
         <span id="iTag" class="chip-s"></span>
         <span id="iName" class="i-name">Tap a clip to adjust it</span>
         <span id="iNorm" class="i-norm"></span>
+        <button id="btnColors" class="mini mini-w" type="button">Colors</button>
         <button id="btnEditClip" class="mini mini-w" type="button">Edit clip</button>
       </div>
       <div class="i-vol">
@@ -583,6 +600,21 @@ a.btn { display: flex; }
       <div id="segMode" class="seg" role="group" aria-label="Playback mode"></div>
     </div>
   </section>
+</div>
+
+<div id="colorSheet" class="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="clHead">
+    <div class="ed-top">
+      <h2 id="clHead">Button colors</h2>
+      <span class="ed-spacer"></span>
+      <button id="clDone" class="mini mini-w mini-red" type="button">Done</button>
+    </div>
+    <button id="swColor2" class="sw" type="button" aria-pressed="false"><i><b></b></i><span>Use my button colors</span></button>
+    <p id="clNote" class="hint"></p>
+    <section id="clBtnSec"><h3 id="clBtnH" class="cl-h"></h3><div id="clBtn" class="swatches"></div></section>
+    <section id="clTagSec"><h3 id="clTagH" class="cl-h"></h3><div id="clTagChips" class="chips cl-chips"></div><div id="clTag" class="swatches"></div></section>
+    <div><button id="clReset" class="mini mini-w mini-danger" type="button">Clear all my colors</button></div>
+  </div>
 </div>
 
 <div id="chSheet" class="modal" hidden>
@@ -1160,12 +1192,23 @@ if (typeof module !== 'undefined') module.exports = Engine;
     { bg: '#FBE4A6', fg: '#4A3300', chip: 'rgba(74,51,0,0.12)', dot: '#FBE4A6' },
     { bg: '#2A5FC7', fg: '#FFFFFF', chip: 'rgba(255,255,255,0.22)', dot: '#2A5FC7' }
   ];
+  // Custom button colors: each background has a hand-picked text color (every pair is at least 4.5:1 contrast).
+  var SWATCHES = [
+    ['red', 'Red', '#E11D2E', '#FFFFFF'], ['orange', 'Orange', '#F26A1B', '#1B0F00'], ['yellow', 'Yellow', '#FFC72C', '#1F1600'], ['lime', 'Lime', '#9BE22E', '#102000'],
+    ['green', 'Green', '#34D17A', '#04200F'], ['teal', 'Teal', '#14B8A6', '#021F1B'], ['cyan', 'Cyan', '#38C8F2', '#021B26'], ['blue', 'Blue', '#2B62F0', '#FFFFFF'],
+    ['navy', 'Navy', '#00338D', '#FFFFFF'], ['purple', 'Purple', '#7A3FF2', '#FFFFFF'], ['magenta', 'Magenta', '#D81B8C', '#FFFFFF'], ['pink', 'Pink', '#FF8CC6', '#2B0A1B'],
+    ['brown', 'Brown', '#7B4A24', '#FFFFFF'], ['white', 'White', '#F4F6FB', '#0A1A3F'], ['gray', 'Gray', '#94A0B8', '#08122B'], ['black', 'Black', '#151B2E', '#FFFFFF']
+  ];
+  var SW = {};
+  SWATCHES.forEach(function (w) {
+    SW[w[0]] = { id: w[0], name: w[1], bg: w[2], fg: w[3], dot: w[2], chip: w[3] === '#FFFFFF' ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.16)' };
+  });
   var TEAMS = { bills: 'Bills', sabres: 'Sabres' };
   var MODES = [['full', 'Play through'], ['toggle', 'Tap to stop'], ['restart', 'Restart'], ['loop', 'Loop']];
   var COLS = ['auto', 3, 4, 5, 6];
 
   var S = {
-    clips: [], team: 'bills', tagOrders: { bills: [], sabres: [] }, tagOrder: [], edit: false, tag: 'All', cols: 'auto', grouped: false, cutoff: true,
+    clips: [], team: 'bills', tagOrders: { bills: [], sabres: [] }, tagOrder: [], edit: false, tag: 'All', cols: 'auto', grouped: false, cutoff: true, custom: false, tagColors: { bills: {}, sabres: {} },
     selected: null, persist: true, started: false
   };
   var ctx = null, master = null, voices = new Map(), tokenN = 0;
@@ -1179,6 +1222,18 @@ if (typeof module !== 'undefined') module.exports = Engine;
   function allByOrder() { return S.clips.slice().sort(function (a, b) { return a.order - b.order; }); }
   function nextOrder() { var m = 0; S.clips.forEach(function (c) { if (c.order > m) m = c.order; }); return m + 1; }
   function palFor(tag) { var p = S.team === 'sabres' ? PALETTE_SABRES : PALETTE, i = Math.max(0, S.tagOrder.indexOf(tag)); return p[i % p.length]; }
+  // Colors in use: theme by tag, unless "Use my button colors" is on and she picked something.
+  function tagLook(tag) {
+    var th = palFor(tag);
+    if (!S.custom) return th;
+    var id = (S.tagColors[S.team] || {})[tag];
+    return id && SW[id] ? SW[id] : th;
+  }
+  function clipLook(c) {
+    var tl = tagLook(c.tag);
+    if (S.custom && c.color && SW[c.color]) return { p: SW[c.color], dot: tl.dot };
+    return { p: tl, dot: null };
+  }
   function chans(buf) { var o = []; for (var i = 0; i < buf.numberOfChannels; i++) o.push(buf.getChannelData(i)); return o; }
   function tick() { return new Promise(function (r) { setTimeout(r, 0); }); }
   var toastT;
@@ -1242,7 +1297,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
     if (!warned) { warned = true; toast("Couldn't save to this iPad. Clips may be lost when the app closes.", 5000); }
   }
   function meta(c) {
-    return { id: c.id, name: c.name, team: c.team || 'bills', tag: c.tag, order: c.order, vol: c.vol, mode: c.mode, trimStart: c.trimStart, trimEnd: c.trimEnd, lufs: c.lufs, peakDb: c.peakDb, gainDb: c.gainDb, dur: c.dur, long: !!c.long, peaks: c.peaks || undefined };
+    return { id: c.id, name: c.name, team: c.team || 'bills', tag: c.tag, order: c.order, vol: c.vol, mode: c.mode, trimStart: c.trimStart, trimEnd: c.trimEnd, lufs: c.lufs, peakDb: c.peakDb, gainDb: c.gainDb, dur: c.dur, long: !!c.long, peaks: c.peaks || undefined, color: c.color || undefined };
   }
   function saveClip(c) { if (!S.persist) return Promise.resolve(); return DB.put('clips', meta(c)).catch(fail); }
   var saveTimers = {};
@@ -1250,7 +1305,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
   function saveSettings() {
     if (!S.persist) return Promise.resolve();
     S.tagOrders[S.team] = S.tagOrder;
-    return DB.put('meta', { cols: S.cols, grouped: S.grouped, cutoff: S.cutoff, team: S.team, tagOrders: S.tagOrders }, 'settings').catch(fail);
+    return DB.put('meta', { cols: S.cols, grouped: S.grouped, cutoff: S.cutoff, team: S.team, tagOrders: S.tagOrders, custom: S.custom, tagColors: S.tagColors }, 'settings').catch(fail);
   }
   function getBytes(c) { return S.persist ? DB.get('audio', c.id) : Promise.resolve(c.bytes); }
 
@@ -1485,7 +1540,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
         var m = meta(list[i]); m.len = ab.byteLength;
         items.push(m); chunks.push(ab);
       }
-      var hdr = new TextEncoder().encode(JSON.stringify({ app: 'fulton-soundboard', v: 1, settings: { cols: S.cols, grouped: S.grouped, cutoff: S.cutoff, tagOrders: S.tagOrders }, clips: items }));
+      var hdr = new TextEncoder().encode(JSON.stringify({ app: 'fulton-soundboard', v: 1, settings: { cols: S.cols, grouped: S.grouped, cutoff: S.cutoff, tagOrders: S.tagOrders, tagColors: S.tagColors, custom: S.custom }, clips: items }));
       var lenBuf = new Uint8Array(4); new DataView(lenBuf.buffer).setUint32(0, hdr.length, true);
       var blob = new Blob([new TextEncoder().encode('SBX1'), lenBuf, hdr].concat(chunks), { type: 'application/octet-stream' });
       var d = new Date(), pad = function (n) { return (n < 10 ? '0' : '') + n; };
@@ -1514,7 +1569,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
         toast('Restoring ' + (i + 1) + ' of ' + head.clips.length, 60000);
         await tick();
         var buf = m.long ? null : await decode(bytes.slice(0));
-        var c = { id: m.id, name: m.name, team: m.team || 'bills', tag: m.tag, order: nextOrder(), vol: m.vol, mode: m.mode, trimStart: m.trimStart, trimEnd: m.trimEnd, lufs: m.lufs, peakDb: m.peakDb, gainDb: m.gainDb, dur: m.dur, buf: buf, long: !!m.long, peaks: m.peaks };
+        var c = { id: m.id, name: m.name, team: m.team || 'bills', tag: m.tag, order: nextOrder(), vol: m.vol, mode: m.mode, trimStart: m.trimStart, trimEnd: m.trimEnd, lufs: m.lufs, peakDb: m.peakDb, gainDb: m.gainDb, dur: m.dur, buf: buf, long: !!m.long, peaks: m.peaks, color: m.color };
         if (S.persist) { try { await DB.put('audio', bytes, c.id); await DB.put('clips', meta(c)); } catch (e) { fail(); } } else c.bytes = bytes;
         if (c.long) prepareLong(c, bytes);
         S.clips.push(c); added++;
@@ -1525,6 +1580,11 @@ if (typeof module !== 'undefined') module.exports = Engine;
         to[tm].forEach(function (t) { if (cur.indexOf(t) < 0) cur.push(t); });
         if (tm === S.team) S.tagOrder = cur;
       });
+      var tcs = head.settings && head.settings.tagColors;
+      if (tcs) Object.keys(tcs).forEach(function (tm) {
+        var cur = S.tagColors[tm] || (S.tagColors[tm] = {});
+        Object.keys(tcs[tm] || {}).forEach(function (t) { if (!cur[t] && SW[tcs[tm][t]]) cur[t] = tcs[tm][t]; });
+      });
       fixTags(); await saveSettings(); renderAll();
       toast(added ? added + ' clips restored.' : 'Everything in that backup is already here.');
     } catch (e) { toast("That file isn't a soundboard backup."); }
@@ -1534,6 +1594,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
     stopAll();
     var gone = teamClips();
     S.clips = S.clips.filter(function (c) { return (c.team || 'bills') !== S.team; });
+    S.tagColors[S.team] = {};
     S.tagOrder = []; S.tagOrders[S.team] = S.tagOrder; S.tag = 'All'; S.selected = null;
     if (S.persist) {
       try {
@@ -1551,12 +1612,12 @@ if (typeof module !== 'undefined') module.exports = Engine;
     return l;
   }
   function tileHTML(c) {
-    var p = palFor(c.tag), dur = Math.max(0, c.trimEnd - c.trimStart);
+    var lk = clipLook(c), p = lk.p, dur = Math.max(0, c.trimEnd - c.trimStart);
     var play = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg>';
     var stop = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>';
     var live = c.mode === 'full' ? 'Playing' : c.mode === 'loop' ? 'Looping · tap to stop' : 'Tap to stop';
     return '<button class="tile' + (S.edit && S.selected === c.id ? ' sel' : '') + '" type="button" data-id="' + c.id + '" style="--bg:' + p.bg + ';--fg:' + p.fg + ';--chip:' + p.chip + ';--dur:' + dur.toFixed(2) + 's">' +
-      '<span class="chip">' + esc(c.tag) + '</span><span class="name">' + esc(c.name) + '</span>' +
+      (lk.dot ? '<span class="cdot" style="background:' + lk.dot + '" title="' + esc(c.tag) + '"></span>' : '') + '<span class="chip">' + esc(c.tag) + '</span><span class="name">' + esc(c.name) + '</span>' +
       '<span class="status"><span class="st-idle">' + play + dur.toFixed(1) + ' sec' + (c.mode === 'loop' ? ' · loop' : '') + '</span><span class="st-play">' + stop + live + '</span></span>' +
       '<span class="bar"></span></button>';
   }
@@ -1576,7 +1637,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
     var names = ['All'].concat(S.tagOrder);
     el.innerHTML = names.map(function (n) {
       var cnt = n === 'All' ? tc.length : tc.filter(function (c) { return c.tag === n; }).length;
-      var dot = n === 'All' ? '' : '<span class="dot" style="background:' + palFor(n).dot + '"></span>';
+      var dot = n === 'All' ? '' : '<span class="dot" style="background:' + tagLook(n).dot + '"></span>';
       return '<button class="tab" type="button" data-tag="' + esc(n) + '" aria-pressed="' + (S.tag === n) + '">' + dot + '<span>' + esc(n) + '</span><span class="n">' + cnt + '</span></button>';
     }).join('') + '<span class="count">' + tc.length + ' clips · ' + S.tagOrder.length + ' tags</span>';
   }
@@ -1597,7 +1658,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
       var maxN = 1; groups.forEach(function (g) { if (g.length > maxN) maxN = g.length; });
       cols = Math.max(maxN, 4); rows = groups.length;
       groups.forEach(function (g) {
-        html += '<div class="glabel"><span class="gn"><i style="background:' + palFor(g[0].tag).dot + '"></i>' + esc(g[0].tag) + '</span><span class="gc">' + g.length + (g.length === 1 ? ' clip' : ' clips') + '</span></div>';
+        html += '<div class="glabel"><span class="gn"><i style="background:' + tagLook(g[0].tag).dot + '"></i>' + esc(g[0].tag) + '</span><span class="gc">' + g.length + (g.length === 1 ? ' clip' : ' clips') + '</span></div>';
         g.forEach(function (c) { html += tileHTML(c); });
         for (var i = g.length; i < cols; i++) html += '<div class="gap"></div>';
       });
@@ -1622,6 +1683,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
     }).join('');
     $('#swGroup').setAttribute('aria-pressed', S.grouped);
     $('#swCut').setAttribute('aria-pressed', S.cutoff);
+    $('#swColor').setAttribute('aria-pressed', S.custom);
     renderInspector();
   }
   function renderInspector() {
@@ -1631,7 +1693,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
       chip.textContent = ''; $('#iName').textContent = 'Tap a clip to adjust it'; $('#iNorm').textContent = '';
       $('#segMode').innerHTML = ''; return;
     }
-    var p = palFor(c.tag);
+    var p = tagLook(c.tag);
     chip.textContent = c.tag; chip.style.background = p.bg; chip.style.color = p.fg;
     $('#iName').textContent = c.name;
     $('#iNorm').textContent = isFinite(c.lufs)
@@ -1899,6 +1961,74 @@ if (typeof module !== 'undefined') module.exports = Engine;
     if (f.length) handleFiles(f);
   });
 
+  /* ---------- colors sheet ---------- */
+  var CS = null;   // { tag } while the colors sheet is open
+  function swatchBtns(cur, autoBg, autoFg) {
+    var html = '<button type="button" class="swt auto" data-id="" aria-pressed="' + !cur + '" style="--bg:' + autoBg + ';--fg:' + autoFg + '"><span>Auto</span></button>';
+    return html + SWATCHES.map(function (w) {
+      return '<button type="button" class="swt" data-id="' + w[0] + '" aria-label="' + w[1] + '" aria-pressed="' + (cur === w[0]) + '" style="--bg:' + w[2] + ';--fg:' + w[3] + '"><span>Aa</span></button>';
+    }).join('');
+  }
+  function renderColors() {
+    if (!CS) return;
+    var c = byId(S.selected), tag = CS.tag, th = palFor(tag);
+    $('#swColor2').setAttribute('aria-pressed', S.custom);
+    $('#clNote').hidden = S.custom;
+    $('#clNote').textContent = 'Switch on "Use my button colors" to see these on the board. Your picks are kept either way.';
+    var showBtn = !!c;
+    $('#clBtnSec').hidden = !showBtn;
+    if (c) {
+      $('#clBtnH').textContent = 'This button: ' + c.name;
+      var tl = tagLook(c.tag);
+      $('#clBtn').innerHTML = swatchBtns(c.color && SW[c.color] ? c.color : '', tl.bg, tl.fg);
+    }
+    $('#clTagChips').innerHTML = S.tagOrder.map(function (t) {
+      return '<button type="button" data-tag="' + esc(t) + '" aria-pressed="' + (t === tag) + '"><i style="background:' + tagLook(t).dot + '"></i>' + esc(t) + '</button>';
+    }).join('');
+    $('#clTagH').textContent = 'Whole tag: ' + tag;
+    $('#clTag').innerHTML = swatchBtns((S.tagColors[S.team] || {})[tag] || '', th.bg, th.fg);
+  }
+  function openColors() {
+    var c = byId(S.selected);
+    CS = { tag: S.tag !== 'All' && S.tagOrder.indexOf(S.tag) >= 0 ? S.tag : (c ? c.tag : S.tagOrder[0]) };
+    if (!CS.tag) { toast('Add a clip first.'); CS = null; return; }
+    $('#colorSheet').hidden = false; renderColors();
+  }
+  function closeColors() { $('#colorSheet').hidden = true; CS = null; }
+  function toggleCustom() { S.custom = !S.custom; saveSettings(); renderAll(); renderColors(); }
+  $('#btnColors').addEventListener('click', openColors);
+  $('#clDone').addEventListener('click', closeColors);
+  $('#swColor').addEventListener('click', toggleCustom);
+  $('#swColor2').addEventListener('click', toggleCustom);
+  $('#clBtn').addEventListener('click', function (e) {
+    var b = e.target.closest('.swt'), c = byId(S.selected); if (!b || !c) return;
+    if (b.dataset.id) c.color = b.dataset.id; else delete c.color;
+    if (b.dataset.id && !S.custom) { S.custom = true; saveSettings(); toast('Button colors are now on.'); }
+    saveClip(c); renderAll(); renderColors();
+  });
+  $('#clTag').addEventListener('click', function (e) {
+    var b = e.target.closest('.swt'); if (!b || !CS) return;
+    var m = S.tagColors[S.team] || (S.tagColors[S.team] = {});
+    if (b.dataset.id) m[CS.tag] = b.dataset.id; else delete m[CS.tag];
+    if (b.dataset.id && !S.custom) { S.custom = true; toast('Button colors are now on.'); }
+    saveSettings(); renderAll(); renderColors();
+  });
+  $('#clTagChips').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || !CS) return;
+    CS.tag = b.dataset.tag; renderColors();
+  });
+  $('#clReset').addEventListener('click', function () {
+    var el = $('#clReset');
+    if (!el.classList.contains('armed')) {
+      el.classList.add('armed'); el.textContent = 'Tap again to clear all colors';
+      setTimeout(function () { el.classList.remove('armed'); el.textContent = 'Clear all my colors'; }, 3000); return;
+    }
+    el.classList.remove('armed'); el.textContent = 'Clear all my colors';
+    S.clips.forEach(function (c) { if (c.color) { delete c.color; saveClip(c); } });
+    S.tagColors = { bills: {}, sabres: {} };
+    saveSettings(); renderAll(); renderColors(); toast('Colors cleared.');
+  });
+
   /* ---------- start up ---------- */
   var wake = null;
   function keepAwake() {
@@ -1926,6 +2056,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
         if (st) {
           S.cols = st.cols === undefined ? 'auto' : st.cols; S.grouped = !!st.grouped; S.cutoff = st.cutoff !== false;
           S.team = st.team === 'sabres' ? 'sabres' : 'bills';
+          S.custom = !!st.custom; S.tagColors = st.tagColors || {}; if (!S.tagColors.bills) S.tagColors.bills = {}; if (!S.tagColors.sabres) S.tagColors.sabres = {};
           S.tagOrders = st.tagOrders || { bills: st.tagOrder || [], sabres: [] };
           if (!S.tagOrders.bills) S.tagOrders.bills = []; if (!S.tagOrders.sabres) S.tagOrders.sabres = [];
           S.tagOrder = S.tagOrders[S.team];
@@ -1941,7 +2072,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
     fixTags(); renderAll();
     var l = visible(); S.selected = l.length ? l[0].id : null;
   }
-  window.__sb = { S: S, voices: voices, E: E, press: press, stopAll: stopAll, applyTeam: applyTeam };
+  window.__sb = { SW: SW, S: S, voices: voices, E: E, press: press, stopAll: stopAll, applyTeam: applyTeam };
   boot();
   try {
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
