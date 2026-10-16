@@ -471,6 +471,20 @@ a.btn { display: flex; }
   .tile { transition: none; }
 }
 
+/* providers, packages, channel screen columns */
+.g-prov { flex: none; }
+.ch.num b.o { background: #1b6fd1; }
+.ch.num b.o.x { background: transparent; color: var(--muted); border: 1px dashed var(--line); font-size: 15px; padding: 7px 8px; }
+.ch.num.pkg b { background: #7a3db8; font-size: 20px; }
+.ch.none i { font-style: normal; }
+.ch.ovr { border: 1px dashed rgba(255,255,255,.55); background: transparent; color: #fff; font: inherit; font-size: 14px; font-weight: 600; min-height: 36px; cursor: pointer; }
+.ch.ovr.on { background: rgba(255,255,255,.18); border-style: solid; }
+.ch-head { grid-column: 1 / -1; display: flex; gap: 10px; justify-content: flex-end; color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .06em; }
+.ch-head span { flex: 1; }
+.ch-head b { width: 112px; text-align: center; font-weight: 700; }
+.ch-sp { width: 112px; flex: none; }
+.ch-row input { flex: none; }
+
 </style>
 </head>
 <body>
@@ -521,6 +535,7 @@ a.btn { display: flex; }
       <input id="gQ" type="search" placeholder="Search team, league or channel" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
       <button id="gClear" class="g-x" type="button" aria-label="Clear search">&times;</button>
     </label>
+    <nav id="gProv" class="tabs g-prov" aria-label="Provider"></nav>
     <nav id="gSports" class="tabs g-sports" aria-label="Sport"></nav>
   </div>
   <div id="gMsg" class="g-msg" hidden></div>
@@ -625,7 +640,7 @@ a.btn { display: flex; }
       <button id="chReset" class="mini mini-w mini-danger" type="button">Reset all</button>
       <button id="chDone" class="mini mini-w mini-red" type="button">Done</button>
     </div>
-    <p class="hint">These start from DirecTV&rsquo;s standard lineup. If a number is wrong for your account, change it here. It is saved on this device and used everywhere on the Games page.</p>
+    <p class="hint">DirecTV numbers start from its standard lineup and Optimum from the Brooklyn lineup. Package numbers (Sunday Ticket and so on) are unverified, so check them against the guide. If a number is wrong, change it here. It is saved on this device and used everywhere on the Games page.</p>
     <div id="chRows" class="ch-rows"></div>
   </div>
 </div>
@@ -829,7 +844,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
 (function () {
   'use strict';
   var TZ = 'America/New_York';
-  var KEY = 'fulton.games.v1';
+  var KEY = 'fulton.games.v2';
   var LEAGUES = [
     { id: 'nfl', name: 'NFL', path: 'football/nfl', sport: 'football' },
     { id: 'ncaaf', name: 'College Football', path: 'football/college-football', sport: 'football' },
@@ -920,7 +935,24 @@ if (typeof module !== 'undefined') module.exports = Engine;
     ['paramount', 'Paramount+', '', 'stream', 1, ['paramount+']], ['apple', 'Apple TV', '', 'stream', 1, ['appletv+', 'appletv']], ['netflix', 'Netflix', '', 'stream', 1],
     ['max', 'Max', '', 'stream', 1, ['hbomax']], ['foxone', 'FOX One', '', 'stream', 1], ['nflplus', 'NFL+', '', 'stream', 1, ['nfl+']], ['youtube', 'YouTube', '', 'stream', 1]
   ];
-  var CHGROUPS = [['sports', 'Sports channels'], ['local', 'New York locals'], ['es', 'Spanish-language'], ['rsn', 'Regional sports'], ['stream', 'Streaming only (no channel number)']];
+  // Game packages: these are not feed channel names, the rules below add them. Numbers are unverified, check them once.
+  CH.push(['pk_st', 'NFL Sunday Ticket', '9552\u20139567', 'pkg', 0], ['pk_tnf', 'Prime Video TNF (on DirecTV)', '9550', 'pkg', 0],
+    ['pk_nflx', 'Netflix NFL games', '9546\u20139547', 'pkg', 0], ['pk_ci', 'NHL Center Ice', '770\u2013793', 'pkg', 0],
+    ['pk_lp', 'NBA League Pass', '751\u2013769', 'pkg', 0], ['pk_ei', 'MLB Extra Innings', '', 'pkg', 0]);
+  var CHGROUPS = [['sports', 'Sports channels'], ['local', 'New York locals'], ['es', 'Spanish-language'], ['rsn', 'Regional sports'], ['pkg', 'Game packages (Sunday Ticket, Center Ice, League Pass)'], ['stream', 'Streaming only (no channel number)']];
+  // Optimum (Brooklyn lineup, HD numbers where the lineup prints one). Anything missing here is shown as "Not carried".
+  var OPT = { espn: '210', espn2: '211', espnu: '217', espnews: '216', espndeportes: '1066', fs1: '213', fs2: '214', tnt: '37', tbs: '39', trutv: '58', usa: '38',
+    golf: '224', tennis: '226', cbssn: '215', nfln: '219', nflrz: '220', nhln: '268', btn: '247', secn: '246', accn: '248',
+    cbs: '2', nbc: '4', fox: '5', abc: '7', cw: '11', univision: '1004', telemundo: '1007', universo: '1074', unimas: '1005', tudn: '1065', foxdeportes: '1067',
+    msg: '203', yes: '201', sny: '202' };
+  var NYC = { nfl: ['New York Giants', 'New York Jets'], nhl: ['New York Rangers', 'New York Islanders', 'New Jersey Devils'], nba: ['New York Knicks', 'Brooklyn Nets'], mlb: ['New York Yankees', 'New York Mets'] };
+  var PROVKEY = 'fulton.prov.v1', OVRKEY = 'fulton.nyc.v1', prov = 'both', gameOver = {};
+  function provLoad() { try { var v = localStorage.getItem(PROVKEY); if (v === 'dtv' || v === 'opt' || v === 'both') prov = v; } catch (e) { /* default */ } }
+  function ovrLoad() {
+    try { gameOver = JSON.parse(localStorage.getItem(OVRKEY) || '{}') || {}; } catch (e) { gameOver = {}; }
+    var today = ymdOf(Date.now()); Object.keys(gameOver).forEach(function (k) { if (gameOver[k] < today) delete gameOver[k]; });
+  }
+  function ovrSave() { try { localStorage.setItem(OVRKEY, JSON.stringify(gameOver)); } catch (e) { /* fine */ } }
   var CHBYKEY = {}, CHALIAS = {};
   CH.forEach(function (c) { CHBYKEY[c[0]] = c; CHALIAS[c[0]] = c[0]; (c[5] || []).forEach(function (a) { CHALIAS[a] = c[0]; }); });
   var chOver = {};
@@ -931,7 +963,8 @@ if (typeof module !== 'undefined') module.exports = Engine;
   function chInfo(raw) {
     var k = normKey(raw), ck = CHALIAS[k] || k, c = CHBYKEY[ck];
     var num = Object.prototype.hasOwnProperty.call(chOver, ck) ? chOver[ck] : (c ? c[2] : '');
-    return { key: ck, name: c ? c[1] : String(raw).trim(), num: num, stream: !!(c && c[3] === 'stream' && !num), known: !!c };
+    var ok = 'o:' + ck, opt = Object.prototype.hasOwnProperty.call(chOver, ok) ? chOver[ok] : (OPT[ck] || '');
+    return { key: ck, name: c ? c[1] : String(raw).trim(), num: num, opt: opt, stream: !!(c && c[3] === 'stream' && !num), known: !!c };
   }
 
   /* ---------- reading the feed ---------- */
@@ -949,6 +982,11 @@ if (typeof module !== 'undefined') module.exports = Engine;
     });
     return out;
   }
+  function hasNational(ev) {
+    var all = (ev.competitions || []).slice(); all.push(ev);
+    return all.some(function (c) { return (c.broadcasts || []).some(function (b) { return b.market === 'national' && (b.names || []).length; }); });
+  }
+  function dowOf(ms) { return new Date(ms).toLocaleDateString('en-US', { weekday: 'short', timeZone: TZ }); }
   function teamOf(c) {
     var t = c.team || {};
     var rank = c.curatedRank && c.curatedRank.current > 0 && c.curatedRank.current <= 25 ? c.curatedRank.current : 0;
@@ -959,7 +997,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
     var st = (ev.status && ev.status.type) || (c0.status && c0.status.type) || {};
     var start = Date.parse(ev.date || c0.date || ''); if (!isFinite(start)) return null;
     var end = Date.parse(ev.endDate || c0.endDate || ''); if (!isFinite(end)) end = start;
-    var o = { id: lg.id + ':' + ev.id, lg: lg.id, sport: lg.sport, start: start, end: end, title: ev.name || ev.shortName || '', state: st.state || '', off: /POSTPON|CANCEL/i.test(st.name || ''), venue: (c0.venue && c0.venue.fullName) || '', ch: channelsOf(ev), home: null, away: null, multi: false, bouts: 0 };
+    var o = { id: lg.id + ':' + ev.id, lg: lg.id, sport: lg.sport, start: start, end: end, title: ev.name || ev.shortName || '', state: st.state || '', off: /POSTPON|CANCEL/i.test(st.name || ''), venue: (c0.venue && c0.venue.fullName) || '', ch: channelsOf(ev), nat: hasNational(ev), dow: dowOf(start), home: null, away: null, multi: false, bouts: 0 };
     var cs = c0.competitors || [];
     if (!lg.solo && cs.length === 2 && cs[0].team && cs[1].team) {
       var h = cs[0].homeAway === 'away' ? cs[1] : cs[0], a = h === cs[0] ? cs[1] : cs[0];
@@ -1012,7 +1050,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
   }
   function matches(e) {
     if (!G.q) return true;
-    var hay = e.hay + ' ' + e.ch.map(function (n) { var i = chInfo(n); return i.name + ' ' + i.num; }).join(' ').toLowerCase();
+    var hay = e.hay + ' ' + e.ch.map(function (n) { var i = chInfo(n); return i.name + ' ' + i.num + ' ' + i.opt; }).join(' ').toLowerCase();
     return G.q.toLowerCase().split(/\s+/).filter(Boolean).every(function (w) { return hay.indexOf(w) >= 0; });
   }
   function phase(e, now) {
@@ -1023,18 +1061,67 @@ if (typeof module !== 'undefined') module.exports = Engine;
     if (now > e.start + d) return 'past';
     return now >= e.start ? 'now' : 'soon';
   }
+  /* What to show for a game: the feed's channels, adjusted by the bar's rules (Sunday Ticket, Center Ice and so on). */
+  function isNyc(e) {
+    var list = NYC[e.lg] || [], n = e.home ? [e.home.name, e.away.name] : [];
+    return n.some(function (x) { return list.indexOf(x) >= 0; });
+  }
+  function pkgItem(key) {
+    var c = CHBYKEY[key], v = Object.prototype.hasOwnProperty.call(chOver, key) ? chOver[key] : c[2];
+    return { key: key, name: c[1], num: v, opt: '', pkg: true, stream: false, known: true };
+  }
+  function listing(e) {
+    var seen = {}, list = [], notes = [];
+    function add(i) { if (!seen[i.key]) { seen[i.key] = 1; list.push(i); } }
+    var items = e.ch.map(chInfo);
+    var hasKey = function (k) { return items.some(function (i) { return i.key === k; }); };
+    if (e.lg === 'nfl') {
+      items.forEach(function (i) {
+        if (i.key === 'prime') { i = pkgItem('pk_tnf'); i.name = 'Prime Video'; }
+        else if (i.key === 'netflix') { i = pkgItem('pk_nflx'); i.name = 'Netflix'; }
+        add(i);
+      });
+      if (e.dow === 'Sun' && (hasKey('cbs') || hasKey('fox')) && !isNyc(e)) {
+        if (gameOver[e.id]) notes.push('local');
+        else add(pkgItem('pk_st'));
+        e.stOpt = true;
+      }
+    } else if ((e.lg === 'nhl' || e.lg === 'nba' || e.lg === 'mlb') && !e.nat && e.home && !isNyc(e)) {
+      // not on a national channel and not a NYC team: the local network is blacked out here, so it is the package
+      add(pkgItem(e.lg === 'nhl' ? 'pk_ci' : e.lg === 'nba' ? 'pk_lp' : 'pk_ei'));
+      if (e.lg === 'mlb' && !pkgItem('pk_ei').num) notes.push('Check the Extra Innings guide');
+    } else items.forEach(add);
+    return { list: list, notes: notes };
+  }
+  function oneBadge(i) {
+    if (i.pkg) return '<span class="ch num pkg"><b>' + esc(i.num || '?') + '</b><i>' + esc(i.name) + '</i></span>';
+    var d = prov !== 'opt', o = prov !== 'dtv';
+    if (i.stream || (!i.known && !i.num && !i.opt)) {
+      if (!i.known) return '<span class="ch"><i>' + esc(i.name) + '</i></span>';
+      return '<span class="ch stream"><i>' + esc(i.name) + '</i><u>' + (i.key === 'peacock' ? 'via EverPass' : 'streaming') + '</u></span>';
+    }
+    var nums = '';
+    if (d) nums += '<b>' + (i.num ? esc(i.num) : '&ndash;') + '</b>';
+    if (o) nums += '<b class="o' + (i.opt ? '' : ' x') + '">' + (i.opt ? esc(i.opt) : 'No') + '</b>';
+    var cls = 'ch num' + (d && !i.num ? ' d-no' : '');
+    if (prov === 'dtv' && !i.num) return '<span class="ch"><i>' + esc(i.name) + '</i></span>';
+    if (prov === 'opt' && !i.opt) return '<span class="ch none"><i>' + esc(i.name) + '</i> &middot; not carried</span>';
+    return '<span class="' + cls + '">' + nums + '<i>' + esc(i.name) + '</i></span>';
+  }
   function chHtml(e) {
     if (!e.ch.length) return '<span class="ch none">Channel TBA</span>';
-    var seen = {}, list = [];
-    e.ch.forEach(function (n) { var i = chInfo(n); if (!seen[i.key]) { seen[i.key] = 1; list.push(i); } });
+    var L = listing(e), list = L.list;
     // channels with a number first, streaming and unknown after
-    list.sort(function (a, b) { return (b.num ? 1 : 0) - (a.num ? 1 : 0); });
+    list.sort(function (a, b) { return ((b.num || b.opt) ? 1 : 0) - ((a.num || a.opt) ? 1 : 0); });
     var show = list.slice(0, 4), more = list.length - show.length;
-    return show.map(function (i) {
-      if (i.num) return '<span class="ch num"><b>' + esc(i.num) + '</b><i>' + esc(i.name) + '</i></span>';
-      if (i.stream) return '<span class="ch stream"><i>' + esc(i.name) + '</i><u>streaming</u></span>';
-      return '<span class="ch"><i>' + esc(i.name) + '</i></span>';
-    }).join('') + (more > 0 ? '<span class="ch more">+' + more + '</span>' : '');
+    var html = show.map(oneBadge).join('') + (more > 0 ? '<span class="ch more">+' + more + '</span>' : '');
+    if (e.stOpt) {
+      html += gameOver[e.id]
+        ? '<button type="button" class="ch ovr on" data-ovr="' + esc(e.id) + '">Local here &middot; undo</button>'
+        : '<button type="button" class="ch ovr" data-ovr="' + esc(e.id) + '">Is it on CBS/FOX here?</button>';
+    }
+    L.notes.forEach(function (n) { if (n !== 'local') html += '<span class="ch none">' + esc(n) + '</span>'; });
+    return html;
   }
   function teamHtml(t) {
     return '<div class="g-team">' + (t.logo ? '<img src="' + esc(t.logo) + '" alt="" loading="lazy" width="24" height="24" onerror="this.style.display=\'none\'">' : '<i class="g-nologo"></i>') +
@@ -1056,6 +1143,9 @@ if (typeof module !== 'undefined') module.exports = Engine;
     if ($('#games').hidden) return;
     var now = Date.now(), lgName = {}; LEAGUES.forEach(function (l) { lgName[l.id] = l.name; });
     // day tabs
+    $('#gProv').innerHTML = [['dtv', 'DirecTV'], ['opt', 'Optimum'], ['both', 'Both']].map(function (p) {
+      return '<button type="button" class="tab" data-prov="' + p[0] + '" aria-pressed="' + (prov === p[0]) + '">' + p[1] + '</button>';
+    }).join('');
     $('#gDays').innerHTML = G.days.map(function (d, i) {
       return '<button type="button" class="tab" data-day="' + d + '" aria-pressed="' + (d === G.day) + '">' + esc(dayLabel(d, i)) + '</button>';
     }).join('');
@@ -1097,6 +1187,16 @@ if (typeof module !== 'undefined') module.exports = Engine;
     var b = e.target.closest('button'); if (!b) return;
     G.sport = b.dataset.sport; render();
   });
+  $('#gList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-ovr]'); if (!b) return;
+    var id = b.dataset.ovr;
+    if (gameOver[id]) delete gameOver[id]; else gameOver[id] = ymdOf(Date.now() + 36 * 3600 * 1000);
+    ovrSave(); render();
+  });
+  $('#gProv').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    prov = b.dataset.prov; try { localStorage.setItem(PROVKEY, prov); } catch (x) { /* fine */ } render();
+  });
   $('#gQ').addEventListener('input', function (e) { G.q = e.target.value.trim(); render(); });
   $('#gQ').addEventListener('keydown', function (e) { if (e.key === 'Enter') e.target.blur(); });
   $('#gClear').addEventListener('click', function () { $('#gQ').value = ''; G.q = ''; render(); $('#gQ').focus(); });
@@ -1104,26 +1204,31 @@ if (typeof module !== 'undefined') module.exports = Engine;
 
   /* ---------- channel numbers screen ---------- */
   function seenUnknown() {
-    var out = {}, k;
+    var out = {};
     events().forEach(function (e) { e.ch.forEach(function (n) { var i = chInfo(n); if (!i.known && !Object.prototype.hasOwnProperty.call(chOver, i.key)) out[i.key] = i.name; }); });
-    Object.keys(chOver).forEach(function (k2) { if (!CHBYKEY[k2] && !out[k2]) out[k2] = chLabels[k2] || k2; });
+    Object.keys(chOver).forEach(function (k2) { if (k2.slice(0, 2) !== 'o:' && !CHBYKEY[k2] && !out[k2]) out[k2] = chLabels[k2] || k2; });
     return out;
   }
   var chLabels = {};
-  function chRow(key, label, def, note) {
+  function chInput(key, def) {
     var v = Object.prototype.hasOwnProperty.call(chOver, key) ? chOver[key] : def;
-    return '<label class="ch-row"><span class="ch-n">' + esc(label) + (note ? '<small>' + note + '</small>' : '') + '</span><input type="text" inputmode="text" maxlength="12" autocomplete="off" data-ck="' + esc(key) + '" data-def="' + esc(def) + '" value="' + esc(v) + '" placeholder="' + (def ? esc(def) : 'none') + '"></label>';
+    return '<input type="text" inputmode="text" maxlength="14" autocomplete="off" data-ck="' + esc(key) + '" data-def="' + esc(def) + '" value="' + esc(v) + '" placeholder="' + (def ? esc(def) : 'none') + '">';
+  }
+  function chRow(key, label, def, note, optDef, noOpt) {
+    return '<div class="ch-row"><span class="ch-n">' + esc(label) + (note ? '<small>' + note + '</small>' : '') + '</span>' + chInput(key, def) + (noOpt ? '<span class="ch-sp"></span>' : chInput('o:' + key, optDef || '')) + '</div>';
   }
   function openChannels() {
-    var un = seenUnknown(), html = '';
+    var un = seenUnknown(), html = '<div class="ch-head"><span></span><b>DirecTV</b><b>Optimum</b></div>';
     var keys = Object.keys(un);
     if (keys.length) {
       keys.forEach(function (k) { chLabels[k] = un[k]; });
-      html += '<h3>On the schedule, no number yet</h3>' + keys.map(function (k) { return chRow(k, un[k], '', 'Type the DirecTV number'); }).join('');
+      html += '<h3>On the schedule, no number yet</h3>' + keys.map(function (k) { return chRow(k, un[k], '', 'Type the number'); }).join('');
     }
     CHGROUPS.forEach(function (g) {
       var rows = CH.filter(function (c) { return c[3] === g[0]; });
-      html += '<h3>' + esc(g[1]) + '</h3>' + rows.map(function (c) { return chRow(c[0], c[1], c[2], g[0] === 'local' ? 'standard NYC number, check it once' : ''); }).join('');
+      html += '<h3>' + esc(g[1]) + '</h3>' + rows.map(function (c) {
+        return chRow(c[0], c[1], c[2], g[0] === 'local' ? 'standard NYC number, check it once' : g[0] === 'pkg' ? 'unverified, check on the guide' : '', OPT[c[0]], g[0] === 'pkg' || g[0] === 'stream');
+      }).join('');
     });
     $('#chRows').innerHTML = html; $('#chSheet').hidden = false;
   }
@@ -1151,7 +1256,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
 
   var Games = {
     show: function () {
-      chLoad(); loadStore(); var before = G.day; buildDays();
+      chLoad(); provLoad(); ovrLoad(); loadStore(); var before = G.day; buildDays();
       if (before && before !== G.day) G.rec = null;
       render(); load(G.day, false);
     },
@@ -1162,7 +1267,7 @@ if (typeof module !== 'undefined') module.exports = Engine;
       var n = 0; Object.keys(rec.ok).forEach(function (k) { rec.ok[k].forEach(function (e) { if (!e.multi) n++; }); });
       return n;
     },
-    _test: { normalize: normalize, LEAGUES: LEAGUES, chInfo: chInfo }
+    _test: { normalize: normalize, LEAGUES: LEAGUES, chInfo: chInfo, listing: listing }
   };
   window.Games = Games;
 })();
